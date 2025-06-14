@@ -1,0 +1,542 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Калькулятор флотации - Metallurgy Lab{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/flotation.css' %}">
+<style>
+.calculator-container {
+    margin-top: 80px;
+    padding: 2rem;
+    max-width: 1400px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.calculator-hero {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.calculator-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    background: linear-gradient(45deg, var(--primary-blue), var(--accent-gold));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 1rem;
+}
+
+.calculator-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.calculator-section {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    padding: 2rem;
+}
+
+.section-title {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--text-light);
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-label {
+    display: block;
+    color: var(--text-light);
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+
+.form-input {
+    width: 100%;
+    padding: 0.75rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    color: var(--text-light);
+    font-size: 1rem;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--accent-gold);
+    box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.2);
+}
+
+.product-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.product-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 1.5rem;
+}
+
+.product-title {
+    font-weight: 600;
+    color: var(--accent-gold);
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.result-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--accent-gold);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.result-value {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--accent-gold);
+    text-align: center;
+    margin-bottom: 0.5rem;
+}
+
+.result-label {
+    text-align: center;
+    color: var(--text-light);
+    font-weight: 500;
+}
+
+.btn-calculate {
+    background: var(--gradient-primary);
+    color: white;
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: 25px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 100%;
+    margin-bottom: 1rem;
+}
+
+.btn-calculate:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+.btn-save {
+    background: var(--accent-gold);
+    color: var(--dark-bg);
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: 25px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 100%;
+}
+
+.btn-save:hover {
+    background: #e6c200;
+    transform: translateY(-2px);
+}
+
+.btn-save:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.validations {
+    margin-top: 1rem;
+}
+
+.validation-item {
+    padding: 0.75rem;
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+}
+
+.validation-success {
+    background: rgba(34, 197, 94, 0.2);
+    border: 1px solid rgba(34, 197, 94, 0.3);
+    color: #86efac;
+}
+
+.validation-warning {
+    background: rgba(251, 191, 36, 0.2);
+    border: 1px solid rgba(251, 191, 36, 0.3);
+    color: #fbbf24;
+}
+
+.validation-error {
+    background: rgba(239, 68, 68, 0.2);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: #fca5a5;
+}
+
+.checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.checkbox-input {
+    width: auto;
+}
+
+@media (max-width: 768px) {
+    .calculator-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .product-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="calculator-container">
+    <!-- Hero секция -->
+    <div class="calculator-hero">
+        <h1 class="calculator-title">🧮 Калькулятор флотации</h1>
+        <p style="color: #cbd5e1; font-size: 1.1rem;">
+            Расчет показателей флотационного процесса с автоматическим сохранением результатов
+        </p>
+    </div>
+
+    <!-- Основная сетка -->
+    <div class="calculator-grid">
+        <!-- Левая колонка - Ввод данных -->
+        <div class="calculator-section">
+            <h2 class="section-title">📝 Входные данные</h2>
+            
+            <form id="calculatorForm">
+                <!-- Исходные данные -->
+                <div class="form-group">
+                    <label class="form-label">Исходное содержание по анализу (г/т)</label>
+                    <input type="number" step="0.001" class="form-input" name="initial_grade_analysis" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Расчетное исходное содержание (г/т)</label>
+                    <input type="number" step="0.001" class="form-input" name="calculated_initial_grade" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Реагентный режим</label>
+                    <textarea class="form-input" name="reagent_regime" rows="3" placeholder="Например: Микрофлотация. Смесь: РАХ: 150+50 г/т; базовая подача: Х-133: 3+3 г/т"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Конфигурация</label>
+                    <input type="text" class="form-input" name="configuration" placeholder="Конфигурация 1-2">
+                </div>
+
+                <div class="checkbox-group">
+                    <input type="checkbox" class="checkbox-input" name="is_microflotation" id="microflotation">
+                    <label class="form-label" for="microflotation">Микрофлотация</label>
+                </div>
+
+                <!-- Продукты флотации -->
+                <h3 style="color: var(--accent-gold); margin: 2rem 0 1rem 0;">Продукты флотации</h3>
+                
+                <div class="product-grid">
+                    <!-- Финальный концентрат -->
+                    <div class="product-card">
+                        <div class="product-title">🎯 Финальный концентрат</div>
+                        <div class="form-group">
+                            <label class="form-label">Масса (г)</label>
+                            <input type="number" step="0.01" class="form-input product-input" 
+                                   name="final_concentrate_mass" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Содержание (г/т)</label>
+                            <input type="number" step="0.001" class="form-input product-input" 
+                                   name="final_concentrate_grade" required>
+                        </div>
+                    </div>
+
+                    <!-- Отвальные хвосты -->
+                    <div class="product-card">
+                        <div class="product-title">📉 Отвальные хвосты</div>
+                        <div class="form-group">
+                            <label class="form-label">Масса (г)</label>
+                            <input type="number" step="0.01" class="form-input product-input" 
+                                   name="tails_mass" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Содержание (г/т)</label>
+                            <input type="number" step="0.001" class="form-input product-input" 
+                                   name="tails_grade" required>
+                        </div>
+                    </div>
+
+                    <!-- Хвосты перечистки -->
+                    <div class="product-card">
+                        <div class="product-title">🔄 Хвосты перечистки</div>
+                        <div class="form-group">
+                            <label class="form-label">Масса (г)</label>
+                            <input type="number" step="0.01" class="form-input product-input" 
+                                   name="cleaner_tails_mass" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Содержание (г/т)</label>
+                            <input type="number" step="0.001" class="form-input product-input" 
+                                   name="cleaner_tails_grade" required>
+                        </div>
+                    </div>
+
+                    <!-- Концентрат контрольной -->
+                    <div class="product-card">
+                        <div class="product-title">🔍 Концентрат контрольной</div>
+                        <div class="form-group">
+                            <label class="form-label">Масса (г)</label>
+                            <input type="number" step="0.01" class="form-input product-input" 
+                                   name="control_concentrate_mass" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Содержание (г/т)</label>
+                            <input type="number" step="0.001" class="form-input product-input" 
+                                   name="control_concentrate_grade" required>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="button" class="btn-calculate" onclick="calculateResults()">
+                    🧮 Рассчитать показатели
+                </button>
+            </form>
+        </div>
+
+        <!-- Правая колонка - Результаты -->
+        <div class="calculator-section">
+            <h2 class="section-title">📊 Результаты расчета</h2>
+            
+            <div id="resultsContainer" style="display: none;">
+                <!-- Основные показатели -->
+                <div class="result-card">
+                    <div class="result-value" id="extraction">--</div>
+                    <div class="result-label">Извлечение (%)</div>
+                </div>
+
+                <div class="result-card">
+                    <div class="result-value" id="yield">--</div>
+                    <div class="result-label">Выход концентрата (%)</div>
+                </div>
+
+                <div class="result-card">
+                    <div class="result-value" id="efficiency">--</div>
+                    <div class="result-label">Эффективность обогащения (%)</div>
+                </div>
+
+                <!-- Материальный баланс -->
+                <div style="background: rgba(255,255,255,0.03); border-radius: 12px; padding: 1rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--accent-gold); margin-bottom: 1rem;">⚖️ Материальный баланс</h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; font-size: 0.9rem;">
+                        <div>Общая масса: <span id="totalMass">--</span> г</div>
+                        <div>Общее Au: <span id="totalAu">--</span> мкг</div>
+                    </div>
+                </div>
+
+                <!-- Валидация -->
+                <div id="validationsContainer" class="validations"></div>
+
+                <!-- Кнопка сохранения -->
+                <button type="button" class="btn-save" id="saveButton" onclick="saveTest()" disabled>
+                    💾 Сохранить тест
+                </button>
+
+                <div id="saveStatus" style="margin-top: 1rem; text-align: center;"></div>
+            </div>
+
+            <div id="noResults" style="text-align: center; color: #94a3b8; padding: 3rem;">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">🧮</div>
+                <h3>Заполните данные и нажмите "Рассчитать"</h3>
+                <p>Система автоматически рассчитает все показатели флотации</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentResults = null;
+
+function calculateResults() {
+    const form = document.getElementById('calculatorForm');
+    const formData = new FormData(form);
+    
+    // Собираем данные
+    const data = {
+        initial_grade_analysis: formData.get('initial_grade_analysis'),
+        calculated_initial_grade: formData.get('calculated_initial_grade'),
+        reagent_regime: formData.get('reagent_regime'),
+        configuration: formData.get('configuration'),
+        is_microflotation: formData.get('is_microflotation') === 'on',
+        
+        final_concentrate: {
+            mass: formData.get('final_concentrate_mass'),
+            grade: formData.get('final_concentrate_grade')
+        },
+        tails: {
+            mass: formData.get('tails_mass'),
+            grade: formData.get('tails_grade')
+        },
+        cleaner_tails: {
+            mass: formData.get('cleaner_tails_mass'),
+            grade: formData.get('cleaner_tails_grade')
+        },
+        control_concentrate: {
+            mass: formData.get('control_concentrate_mass'),
+            grade: formData.get('control_concentrate_grade')
+        }
+    };
+
+    // AJAX запрос для расчета
+    fetch('{% url "flotation:calculator" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            displayResults(result.results);
+            currentResults = result.results;
+        } else {
+            alert('Ошибка расчета: ' + result.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Ошибка сети');
+    });
+}
+
+function displayResults(results) {
+    // Показываем результаты
+    document.getElementById('resultsContainer').style.display = 'block';
+    document.getElementById('noResults').style.display = 'none';
+    
+    // Заполняем значения
+    document.getElementById('extraction').textContent = results.extraction.toFixed(1);
+    document.getElementById('yield').textContent = results.concentrate_yield.toFixed(1);
+    document.getElementById('efficiency').textContent = results.efficiency.toFixed(1);
+    
+    // Материальный баланс
+    document.getElementById('totalMass').textContent = results.material_balance.total_mass.toFixed(1);
+    document.getElementById('totalAu').textContent = results.material_balance.total_au.toFixed(0);
+    
+    // Валидации
+    const validationsContainer = document.getElementById('validationsContainer');
+    validationsContainer.innerHTML = '';
+    
+    if (results.validations && results.validations.length > 0) {
+        results.validations.forEach(validation => {
+            const div = document.createElement('div');
+            div.className = `validation-item validation-${validation.type}`;
+            div.textContent = validation.message;
+            validationsContainer.appendChild(div);
+        });
+    }
+    
+    // Активируем кнопку сохранения
+    document.getElementById('saveButton').disabled = false;
+}
+
+function saveTest() {
+    if (!currentResults) return;
+    
+    const form = document.getElementById('calculatorForm');
+    const formData = new FormData(form);
+    
+    // Собираем данные для сохранения
+    const data = {
+        initial_grade_analysis: formData.get('initial_grade_analysis'),
+        calculated_initial_grade: formData.get('calculated_initial_grade'),
+        reagent_regime: formData.get('reagent_regime'),
+        configuration: formData.get('configuration'),
+        is_microflotation: formData.get('is_microflotation') === 'on',
+        
+        final_concentrate: {
+            mass: formData.get('final_concentrate_mass'),
+            grade: formData.get('final_concentrate_grade')
+        },
+        tails: {
+            mass: formData.get('tails_mass'),
+            grade: formData.get('tails_grade')
+        },
+        cleaner_tails: {
+            mass: formData.get('cleaner_tails_mass'),
+            grade: formData.get('cleaner_tails_grade')
+        },
+        control_concentrate: {
+            mass: formData.get('control_concentrate_mass'),
+            grade: formData.get('control_concentrate_grade')
+        },
+        save_test: true
+    };
+
+    // Блокируем кнопку
+    const saveButton = document.getElementById('saveButton');
+    saveButton.disabled = true;
+    saveButton.textContent = '💾 Сохранение...';
+
+    // AJAX запрос на сохранение
+    fetch('{% url "flotation:calculator" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.success && result.results.saved) {
+            document.getElementById('saveStatus').innerHTML = `
+                <div style="color: #86efac; font-weight: 600;">
+                    ✅ Тест №${result.results.test_number} успешно сохранен!
+                </div>
+            `;
+            saveButton.textContent = '✅ Тест сохранен';
+        } else {
+            alert('Ошибка сохранения: ' + (result.error || 'Неизвестная ошибка'));
+            saveButton.disabled = false;
+            saveButton.textContent = '💾 Сохранить тест';
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Ошибка сети при сохранении');
+        saveButton.disabled = false;
+        saveButton.textContent = '💾 Сохранить тест';
+    });
+}
+</script>
+
+<!-- CSRF токен для AJAX запросов -->
+{% csrf_token %}
+{% endblock %}

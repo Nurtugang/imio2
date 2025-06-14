@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Главная - Metallurgy Lab{% endblock %}
+
+{% block content %}
+<!-- Hero секция -->
+<section class="hero">
+    <div class="hero-content">
+        <h1>Цифровая лаборатория металлургии</h1>
+        <p>Современная платформа для анализа, оптимизации и управления металлургическими процессами. Повышайте эффективность с помощью данных и аналитики.</p>
+        <a href="{% url 'flotation:dashboard' %}" class="cta-button">Начать работу</a>
+    </div>
+</section>
+
+<!-- Статистика -->
+<section class="stats">
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-number">{{ stats.total_tests }}</div>
+            <div class="stat-label">Флотационных тестов</div>
+            <div class="stat-description">Проведено экспериментов</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ stats.best_extraction }}%</div>
+            <div class="stat-label">Лучшее извлечение</div>
+            <div class="stat-description">С реагентом MP-1</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ stats.configurations }}</div>
+            <div class="stat-label">Конфигураций</div>
+            <div class="stat-description">Реагентных режимов</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ stats.reagents_count }}+</div>
+            <div class="stat-label">Реагентов</div>
+            <div class="stat-description">В базе данных</div>
+        </div>
+    </div>
+</section>
+
+<!-- Модули процессов -->
+<section class="processes">
+    <h2 class="section-title">Металлургические процессы</h2>
+    <div class="process-grid">
+        {% for process in processes %}
+        <div class="process-card {% if process.status == 'active' %}active{% else %}disabled{% endif %}" 
+             {% if process.status == 'active' %}onclick="window.location.href='{% url process.url %}'"{% endif %}>
+            <div class="process-icon">{{ process.icon }}</div>
+            <h3 class="process-title">{{ process.name }}</h3>
+            <p class="process-description">{{ process.description }}</p>
+            <span class="process-status status-{{ process.status }}">
+                {% if process.status == 'active' %}Активный модуль{% else %}Скоро{% endif %}
+            </span>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

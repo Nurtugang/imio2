@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Metallurgy Lab{% endblock %}</title>
+    
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Анимированные частицы -->
+    <div class="particles" id="particles"></div>
+
+    <!-- Навигация -->
+    <nav class="main-nav">
+        <div class="nav-container">
+            <div class="logo">
+                <a href="{% url 'core:home' %}">METALLURGY LAB</a>
+            </div>
+            <ul class="nav-links">
+                <li><a href="{% url 'core:home' %}" class="{% if request.resolver_match.app_name == 'core' and request.resolver_match.url_name == 'home' %}active{% endif %}">Главная</a></li>
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle">Процессы ▼</a>
+                    <div class="dropdown-content">
+                        <a href="{% url 'flotation:dashboard' %}" class="dropdown-item {% if request.resolver_match.app_name == 'flotation' %}active{% endif %}">
+                            🧪 Флотация
+                        </a>
+                        <div class="dropdown-item disabled">⚗️ Процесс 2</div>
+                        <div class="dropdown-item disabled">🔥 Процесс 3</div>
+                        <div class="dropdown-item disabled">🏭 Процесс 4</div>
+                    </div>
+                </li>
+                <li><a href="{% url 'core:knowledge_base' %}" class="{% if request.resolver_match.url_name == 'knowledge_base' %}active{% endif %}">База знаний</a></li>
+                <li><a href="{% url 'analytics:general' %}" class="{% if request.resolver_match.app_name == 'analytics' %}active{% endif %}">Аналитика</a></li>
+                <li><a href="{% url 'calculators:list' %}" class="{% if request.resolver_match.app_name == 'calculators' %}active{% endif %}">Калькуляторы</a></li>
+                <li><a href="{% url 'core:reports' %}" class="{% if request.resolver_match.url_name == 'reports' %}active{% endif %}">Отчеты</a></li>
+            </ul>
+            
+            <!-- Мобильное меню -->
+            <div class="mobile-menu-btn" onclick="toggleMobileMenu()">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Основной контент -->
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Футер -->
+    <footer class="main-footer">
+        <div class="footer-content">
+            <p>&copy; 2025 Metallurgy Lab. Цифровая платформа для металлургических процессов.</p>
+        </div>
+    </footer>
+
+    <!-- Скрипты -->
+    <script src="{% static 'js/script.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
+

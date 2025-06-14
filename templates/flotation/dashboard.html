@@ -1,0 +1,703 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Дашборд флотации - Metallurgy Lab{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/flotation.css' %}">
+<style>
+/* Стили дашборда остаются те же... */
+.dashboard-hero {
+    margin-top: 80px;
+    padding: 3rem 2rem;
+    text-align: center;
+    position: relative;
+}
+
+.dashboard-title {
+    font-size: 3rem;
+    font-weight: 800;
+    background: linear-gradient(45deg, var(--primary-blue), var(--primary-purple), var(--accent-gold));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: glow 2s ease-in-out infinite alternate;
+    margin-bottom: 1rem;
+}
+
+.dashboard-subtitle {
+    font-size: 1.25rem;
+    color: #cbd5e1;
+    line-height: 1.6;
+    max-width: 800px;
+    margin: 0 auto 2rem;
+}
+
+.dashboard-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto 4rem;
+}
+
+.dashboard-stat-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    padding: 2rem;
+    text-align: center;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.dashboard-stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--gradient-primary);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+}
+
+.dashboard-stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+.dashboard-stat-card:hover::before {
+    transform: scaleX(1);
+}
+
+.stat-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    display: block;
+}
+
+.stat-value {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--accent-gold);
+    margin-bottom: 0.5rem;
+}
+
+.stat-title {
+    color: var(--text-light);
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.stat-subtitle {
+    color: #94a3b8;
+    font-size: 0.9rem;
+}
+
+.dashboard-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    padding: 0 2rem 4rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.dashboard-section {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    padding: 2rem;
+    transition: all 0.3s ease;
+}
+
+.dashboard-section:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.section-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-light);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.section-link {
+    color: var(--accent-gold);
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: opacity 0.3s ease;
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--accent-gold);
+    border-radius: 20px;
+}
+
+.section-link:hover {
+    opacity: 0.8;
+    background: var(--accent-gold);
+    color: var(--dark-bg);
+}
+
+/* СТИЛИ ДЛЯ ГРАФИКОВ */
+.chart-container {
+    position: relative;
+    height: 300px;
+    margin-bottom: 1rem;
+}
+
+.chart-canvas {
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 12px;
+}
+
+.data-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    max-height: 300px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--accent-gold) transparent;
+}
+
+.data-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.data-list::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 3px;
+}
+
+.data-list::-webkit-scrollbar-thumb {
+    background: var(--accent-gold);
+    border-radius: 3px;
+}
+
+.data-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+}
+
+.data-item:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: var(--accent-gold);
+    transform: translateX(5px);
+}
+
+.data-item-info h4 {
+    color: var(--text-light);
+    margin-bottom: 0.25rem;
+    font-size: 1rem;
+}
+
+.data-item-meta {
+    color: #94a3b8;
+    font-size: 0.8rem;
+}
+
+.data-item-value {
+    text-align: right;
+}
+
+.data-value-main {
+    color: var(--accent-gold);
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.data-value-sub {
+    color: #94a3b8;
+    font-size: 0.9rem;
+}
+
+.quick-actions {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.quick-action {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.5rem;
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    text-decoration: none;
+    color: var(--text-light);
+    transition: all 0.3s ease;
+}
+
+.quick-action:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    border-color: var(--accent-gold);
+    color: var(--text-light);
+}
+
+.quick-action-icon {
+    font-size: 2rem;
+}
+
+.quick-action-text {
+    flex: 1;
+}
+
+.quick-action-title {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.quick-action-desc {
+    font-size: 0.8rem;
+    color: #94a3b8;
+}
+
+.empty-data {
+    text-align: center;
+    padding: 2rem;
+    color: #94a3b8;
+}
+
+.empty-data-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+.empty-data h4 {
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+    color: #cbd5e1;
+}
+
+@media (max-width: 768px) {
+    .dashboard-content {
+        grid-template-columns: 1fr;
+    }
+    
+    .dashboard-stats {
+        grid-template-columns: 1fr;
+    }
+    
+    .quick-actions {
+        grid-template-columns: 1fr;
+    }
+    
+    .data-item {
+        flex-direction: column;
+        text-align: center;
+        gap: 0.5rem;
+    }
+    
+    .data-item-value {
+        text-align: center;
+    }
+    
+    .dashboard-title {
+        font-size: 2.5rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero секция -->
+<section class="dashboard-hero">
+    <h1 class="dashboard-title">📊 Дашборд флотации</h1>
+    <p class="dashboard-subtitle">
+        Обзор данных флотационных процессов, анализ эффективности реагентов и мониторинг ключевых показателей
+    </p>
+</section>
+
+<!-- Статистические карточки -->
+<section class="dashboard-stats">
+    <div class="dashboard-stat-card">
+        <span class="stat-icon">🧪</span>
+        <div class="stat-value">{{ total_tests|default:"0" }}</div>
+        <div class="stat-title">Всего тестов</div>
+        <div class="stat-subtitle">Проведено экспериментов</div>
+    </div>
+    
+    <div class="dashboard-stat-card">
+        <span class="stat-icon">📈</span>
+        <div class="stat-value">{{ avg_extraction|floatformat:1|default:"0" }}%</div>
+        <div class="stat-title">Среднее извлечение</div>
+        <div class="stat-subtitle">По всем тестам</div>
+    </div>
+    
+    <div class="dashboard-stat-card">
+        <span class="stat-icon">🏆</span>
+        <div class="stat-value">{{ best_extraction|floatformat:1|default:"0" }}%</div>
+        <div class="stat-title">Лучший результат</div>
+        <div class="stat-subtitle">Максимальное извлечение</div>
+    </div>
+    
+    <div class="dashboard-stat-card">
+        <span class="stat-icon">⚗️</span>
+        <div class="stat-value">{{ total_reagents|default:"0" }}</div>
+        <div class="stat-title">Активных реагентов</div>
+        <div class="stat-subtitle">В библиотеке</div>
+    </div>
+</section>
+
+<!-- Основной контент -->
+<section class="dashboard-content">
+    <!-- Последние тесты -->
+    <div class="dashboard-section">
+        <div class="section-header">
+            <h3 class="section-title">
+                🔬 Последние тесты
+            </h3>
+            <a href="{% url 'flotation:tests' %}" class="section-link">Все тесты</a>
+        </div>
+        
+        {% if recent_tests %}
+        <div class="data-list">
+            {% for test in recent_tests %}
+            <div class="data-item">
+                <div class="data-item-info">
+                    <h4>Тест №{{ test.number }}</h4>
+                    <div class="data-item-meta">
+                        {% if test.is_microflotation %}Микрофлотация{% else %}Стандартная флотация{% endif %}
+                        {% if test.configuration %} • {{ test.configuration }}{% endif %}
+                    </div>
+                </div>
+                <div class="data-item-value">
+                    <div class="data-value-main">{{ test.extraction|floatformat:1 }}%</div>
+                    <div class="data-value-sub">{{ test.efficiency|floatformat:1 }}% эфф.</div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-data">
+            <div class="empty-data-icon">📋</div>
+            <h4>Нет данных тестов</h4>
+            <p>Создайте тесты через калькулятор</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- ГРАФИК ТРЕНДА ИЗВЛЕЧЕНИЯ -->
+    <div class="dashboard-section">
+        <div class="section-header">
+            <h3 class="section-title">
+                📈 Тренд извлечения
+            </h3>
+            <a href="{% url 'flotation:analytics' %}" class="section-link">Подробнее</a>
+        </div>
+        
+        <div class="chart-container">
+            <canvas id="trendChart" class="chart-canvas"></canvas>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;">
+            <div style="text-align: center; padding: 1rem; background: rgba(255,255,255,0.03); border-radius: 8px;">
+                <div style="color: var(--accent-gold); font-weight: 600; font-size: 1.2rem;">
+                    {% if best_test %}{{ best_test.extraction|floatformat:1 }}%{% else %}--{% endif %}
+                </div>
+                <div style="color: #94a3b8; font-size: 0.8rem;">Лучший тест</div>
+            </div>
+            <div style="text-align: center; padding: 1rem; background: rgba(255,255,255,0.03); border-radius: 8px;">
+                <div style="color: var(--accent-gold); font-weight: 600; font-size: 1.2rem;">
+                    {{ total_tests|default:"0" }}
+                </div>
+                <div style="color: #94a3b8; font-size: 0.8rem;">Всего данных</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Топ реагенты -->
+    <div class="dashboard-section">
+        <div class="section-header">
+            <h3 class="section-title">
+                🧬 Эффективные реагенты
+            </h3>
+            <a href="{% url 'flotation:reagents' %}" class="section-link">Все реагенты</a>
+        </div>
+        
+        {% if top_reagents %}
+        <div class="data-list">
+            {% for reagent in top_reagents %}
+            <div class="data-item">
+                <div class="data-item-info">
+                    <h4>{{ reagent.icon }} {{ reagent.name }}</h4>
+                    <div class="data-item-meta">{{ reagent.get_type_display }}</div>
+                </div>
+                <div class="data-item-value">
+                    <div class="data-value-main">{{ reagent.max_extraction|floatformat:1|default:"--" }}%</div>
+                    <div class="data-value-sub">макс. извлечение</div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-data">
+            <div class="empty-data-icon">⚗️</div>
+            <h4>Нет данных реагентов</h4>
+            <p>Добавьте реагенты через админ-панель</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- КРУГОВАЯ ДИАГРАММА КОНФИГУРАЦИЙ -->
+    <div class="dashboard-section">
+        <div class="section-header">
+            <h3 class="section-title">
+                🥧 Распределение конфигураций
+            </h3>
+        </div>
+        
+        <div class="chart-container">
+            <canvas id="pieChart" class="chart-canvas"></canvas>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;">
+            <div style="text-align: center; padding: 1rem; background: rgba(255,255,255,0.03); border-radius: 8px;">
+                <div style="color: var(--accent-gold); font-weight: 600; font-size: 1.2rem;">
+                    {{ microflotation_count|default:"0" }}
+                </div>
+                <div style="color: #94a3b8; font-size: 0.8rem;">Микрофлотация</div>
+            </div>
+            <div style="text-align: center; padding: 1rem; background: rgba(255,255,255,0.03); border-radius: 8px;">
+                <div style="color: var(--accent-gold); font-weight: 600; font-size: 1.2rem;">
+                    {{ standard_count|default:"0" }}
+                </div>
+                <div style="color: #94a3b8; font-size: 0.8rem;">Стандартная</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Быстрые действия -->
+    <div class="quick-actions">
+        <a href="{% url 'flotation:tests' %}" class="quick-action">
+            <div class="quick-action-icon">📋</div>
+            <div class="quick-action-text">
+                <div class="quick-action-title">Просмотр тестов</div>
+                <div class="quick-action-desc">Таблица всех флотационных тестов</div>
+            </div>
+        </a>
+        
+        <a href="{% url 'flotation:reagents' %}" class="quick-action">
+            <div class="quick-action-icon">🧪</div>
+            <div class="quick-action-text">
+                <div class="quick-action-title">Управление реагентами</div>
+                <div class="quick-action-desc">Библиотека реагентов и смеси</div>
+            </div>
+        </a>
+        
+        <a href="{% url 'flotation:analytics' %}" class="quick-action">
+            <div class="quick-action-icon">📊</div>
+            <div class="quick-action-text">
+                <div class="quick-action-title">Аналитика</div>
+                <div class="quick-action-desc">Графики и детальный анализ</div>
+            </div>
+        </a>
+        
+        <a href="{% url 'flotation:calculator' %}" class="quick-action">
+            <div class="quick-action-icon">🧮</div>
+            <div class="quick-action-text">
+                <div class="quick-action-title">Калькулятор</div>
+                <div class="quick-action-desc">Расчет показателей флотации</div>
+            </div>
+        </a>
+    </div>
+</section>
+
+<!-- Подключаем Chart.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+
+<script>
+// Данные для графиков из Django
+const trendData = {{ trend_chart_data|safe }};
+const pieData = {{ pie_chart_data|safe }};
+
+// ГРАФИК ТРЕНДА ИЗВЛЕЧЕНИЯ
+const trendCtx = document.getElementById('trendChart').getContext('2d');
+const trendChart = new Chart(trendCtx, {
+    type: 'line',
+    data: {
+        labels: trendData.labels,
+        datasets: [{
+            label: 'Извлечение (%)',
+            data: trendData.data,
+            borderColor: '#FFD700',
+            backgroundColor: 'rgba(255, 215, 0, 0.1)',
+            borderWidth: 3,
+            fill: true,
+            tension: 0.4,
+            pointBackgroundColor: '#FFD700',
+            pointBorderColor: '#1e293b',
+            pointBorderWidth: 2,
+            pointRadius: 6,
+            pointHoverRadius: 8
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                display: false
+            },
+            tooltip: {
+                backgroundColor: 'rgba(30, 41, 59, 0.9)',
+                titleColor: '#FFD700',
+                bodyColor: '#cbd5e1',
+                borderColor: '#FFD700',
+                borderWidth: 1
+            }
+        },
+        scales: {
+            x: {
+                ticks: {
+                    color: '#94a3b8',
+                    maxTicksLimit: 8
+                },
+                grid: {
+                    color: 'rgba(148, 163, 184, 0.1)'
+                }
+            },
+            y: {
+                ticks: {
+                    color: '#94a3b8',
+                    callback: function(value) {
+                        return value + '%';
+                    }
+                },
+                grid: {
+                    color: 'rgba(148, 163, 184, 0.1)'
+                },
+                min: 0,
+                max: 100
+            }
+        },
+        interaction: {
+            intersect: false,
+            mode: 'index'
+        }
+    }
+});
+
+// КРУГОВАЯ ДИАГРАММА КОНФИГУРАЦИЙ
+const pieCtx = document.getElementById('pieChart').getContext('2d');
+const pieChart = new Chart(pieCtx, {
+    type: 'doughnut',
+    data: {
+        labels: pieData.labels,
+        datasets: [{
+            data: pieData.data,
+            backgroundColor: pieData.colors,
+            borderColor: '#1e293b',
+            borderWidth: 2,
+            hoverBorderWidth: 3,
+            hoverBorderColor: '#FFD700'
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'bottom',
+                labels: {
+                    color: '#cbd5e1',
+                    padding: 20,
+                    usePointStyle: true,
+                    font: {
+                        size: 12
+                    }
+                }
+            },
+            tooltip: {
+                backgroundColor: 'rgba(30, 41, 59, 0.9)',
+                titleColor: '#FFD700',
+                bodyColor: '#cbd5e1',
+                borderColor: '#FFD700',
+                borderWidth: 1,
+                callbacks: {
+                    label: function(context) {
+                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                        const percentage = ((context.parsed / total) * 100).toFixed(1);
+                        return context.label + ': ' + context.parsed + ' (' + percentage + '%)';
+                    }
+                }
+            }
+        },
+        cutout: '60%',
+        animation: {
+            animateRotate: true,
+            animateScale: true
+        }
+    }
+});
+
+// Обновление графиков при изменении размера окна
+window.addEventListener('resize', function() {
+    trendChart.resize();
+    pieChart.resize();
+});
+
+// Добавляем анимацию при загрузке страницы
+document.addEventListener('DOMContentLoaded', function() {
+    // Плавное появление карточек статистики
+    const statCards = document.querySelectorAll('.dashboard-stat-card');
+    statCards.forEach((card, index) => {
+        setTimeout(() => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            card.style.transition = 'all 0.6s ease';
+            
+            setTimeout(() => {
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, 100);
+        }, index * 100);
+    });
+    
+    // Плавное появление секций
+    const sections = document.querySelectorAll('.dashboard-section');
+    sections.forEach((section, index) => {
+        setTimeout(() => {
+            section.style.opacity = '0';
+            section.style.transform = 'translateY(30px)';
+            section.style.transition = 'all 0.8s ease';
+            
+            setTimeout(() => {
+                section.style.opacity = '1';
+                section.style.transform = 'translateY(0)';
+            }, 200);
+        }, index * 150);
+    });
+});
+</script>
+{% endblock %}

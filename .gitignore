@@ -1,0 +1,16 @@
+# Кэш Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Виртуальное окружение
+venv/
+.venv/
+env/
+
+# База данных
+db.sqlite3
+*.db
+
+# Миграции
+*/migrations/
