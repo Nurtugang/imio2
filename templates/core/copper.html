@@ -1,0 +1,902 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Анализатор зеленой утилизации медных отвалов{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --primary-green: #22c55e;
+        --primary-copper: #ea580c;
+        --accent-blue: #3b82f6;
+        --glass-bg: rgba(255, 255, 255, 0.05);
+        --glass-border: rgba(255, 255, 255, 0.1);
+        --text-light: #e2e8f0;
+        --bg-dark: #0f172a;
+        --gradient-primary: linear-gradient(135deg, var(--primary-green), var(--accent-blue));
+        --gradient-copper: linear-gradient(135deg, var(--primary-copper), #f59e0b);
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0d4d2d 100%);
+        color: var(--text-light);
+        line-height: 1.6;
+        min-height: 100vh;
+    }
+
+    .container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .header {
+        text-align: center;
+        margin-bottom: 3rem;
+        padding: 2rem;
+    }
+
+    .main-title {
+        font-size: 2.5rem;
+        font-weight: 800;
+        background: var(--gradient-primary);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 1rem;
+        animation: glow 3s ease-in-out infinite alternate;
+    }
+
+    @keyframes glow {
+        from { filter: brightness(1); }
+        to { filter: brightness(1.3); }
+    }
+
+    .subtitle {
+        font-size: 1.2rem;
+        color: #94a3b8;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .dashboard {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        margin-bottom: 3rem;
+    }
+
+    .card {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: 20px;
+        padding: 2rem;
+        transition: all 0.3s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .card-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--primary-green);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .full-width {
+        grid-column: 1 / -1;
+    }
+
+    .tabs {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        border-bottom: 1px solid var(--glass-border);
+    }
+
+    .tab {
+        background: none;
+        border: none;
+        color: #94a3b8;
+        padding: 1rem 1.5rem;
+        cursor: pointer;
+        border-radius: 10px 10px 0 0;
+        transition: all 0.3s ease;
+        font-size: 1rem;
+        font-weight: 500;
+    }
+
+    .tab.active {
+        color: var(--primary-green);
+        background: rgba(34, 197, 94, 0.1);
+        border-bottom: 2px solid var(--primary-green);
+    }
+
+    .tab:hover {
+        color: var(--text-light);
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+    .tab-content {
+        display: none;
+    }
+
+    .tab-content.active {
+        display: block;
+    }
+
+    .chart-container {
+        position: relative;
+        height: 400px;
+        margin: 1rem 0;
+    }
+
+    .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 1.5rem 0;
+        background: rgba(255, 255, 255, 0.02);
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .data-table th,
+    .data-table td {
+        padding: 1rem;
+        text-align: left;
+        border-bottom: 1px solid var(--glass-border);
+    }
+
+    .data-table th {
+        background: var(--gradient-primary);
+        color: white;
+        font-weight: 600;
+    }
+
+    .data-table tr:hover {
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+    .calculator {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        margin: 2rem 0;
+    }
+
+    .input-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .input-label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: var(--primary-green);
+        font-weight: 500;
+    }
+
+    .input-field {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--glass-border);
+        border-radius: 10px;
+        color: var(--text-light);
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .input-field:focus {
+        outline: none;
+        border-color: var(--primary-green);
+        box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+    }
+
+    .calculate-btn {
+        background: var(--gradient-primary);
+        color: white;
+        border: none;
+        padding: 1rem 2rem;
+        border-radius: 10px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        width: 100%;
+    }
+
+    .calculate-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(34, 197, 94, 0.3);
+    }
+
+    .result-box {
+        background: rgba(34, 197, 94, 0.1);
+        border: 1px solid var(--primary-green);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-top: 1rem;
+    }
+
+    .result-title {
+        color: var(--primary-green);
+        font-weight: 600;
+        margin-bottom: 1rem;
+    }
+
+    .metric-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin: 2rem 0;
+    }
+
+    .metric-card {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid var(--glass-border);
+        border-radius: 12px;
+        padding: 1.5rem;
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+
+    .metric-card:hover {
+        background: rgba(255, 255, 255, 0.06);
+        transform: translateY(-3px);
+    }
+
+    .metric-value {
+        font-size: 2rem;
+        font-weight: 800;
+        color: var(--primary-green);
+        margin-bottom: 0.5rem;
+    }
+
+    .metric-label {
+        color: #94a3b8;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .phase-timeline {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin: 2rem 0;
+        position: relative;
+    }
+
+    .phase-timeline::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: var(--gradient-primary);
+        z-index: 1;
+    }
+
+    .phase-step {
+        background: var(--glass-bg);
+        border: 2px solid var(--primary-green);
+        border-radius: 50%;
+        width: 60px;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--primary-green);
+        font-weight: 700;
+        font-size: 1.2rem;
+        position: relative;
+        z-index: 2;
+    }
+
+    .phase-label {
+        position: absolute;
+        top: 80px;
+        left: 50%;
+        transform: translateX(-50%);
+        white-space: nowrap;
+        font-size: 0.9rem;
+        color: var(--text-light);
+        text-align: center;
+    }
+
+    @media (max-width: 768px) {
+        .dashboard {
+            grid-template-columns: 1fr;
+        }
+        
+        .calculator {
+            grid-template-columns: 1fr;
+        }
+        
+        .main-title {
+            font-size: 2rem;
+        }
+        
+        .phase-timeline {
+            flex-direction: column;
+            gap: 2rem;
+        }
+        
+        .phase-timeline::before {
+            display: none;
+        }
+    }
+</style>
+
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1 class="main-title">🌱 Анализатор зеленой утилизации медных отвалов</h1>
+            <p class="subtitle">
+                Комплексный инструмент для анализа и планирования экологической переработки 
+                отработанных медных руд с применением био-гидрометаллургических технологий
+            </p>
+        </header>
+
+        <!-- Key Metrics -->
+        <div class="card full-width">
+            <h2 class="card-title">📊 Ключевые показатели проекта</h2>
+            <div class="metric-grid">
+                <div class="metric-card">
+                    <div class="metric-value">89.3%</div>
+                    <div class="metric-label">Извлечение меди</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">1.8 → 6.5</div>
+                    <div class="metric-label">Изменение pH</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">11</div>
+                    <div class="metric-label">Недель наблюдений</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">0.046%</div>
+                    <div class="metric-label">Финальное содержание Cu</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Dashboard -->
+        <div class="dashboard">
+            <!-- Interactive Charts -->
+            <div class="card full-width">
+                <h2 class="card-title">📈 Интерактивные графики процесса</h2>
+                
+                <div class="tabs">
+                    <button class="tab active" onclick="showTab('ph-dynamics', this)">Динамика pH</button>
+                    <button class="tab" onclick="showTab('concentrations', this)">Концентрации металлов</button>
+                    <button class="tab" onclick="showTab('monitoring', this)">Мониторинг стоков</button>
+                </div>
+
+                <div id="ph-dynamics" class="tab-content active">
+                    <h3>Изменение pH при промывке руды</h3>
+                    <div class="chart-container">
+                        <canvas id="phChart"></canvas>
+                    </div>
+                </div>
+
+                <div id="concentrations" class="tab-content">
+                    <h3>Концентрации Cu, Fe, H₂SO₄ в промывной воде</h3>
+                    <div class="chart-container">
+                        <canvas id="concentrationChart"></canvas>
+                    </div>
+                </div>
+
+                <div id="monitoring" class="tab-content">
+                    <h3>Мониторинг стоков почвенного и общего слоев</h3>
+                    <div class="chart-container">
+                        <canvas id="monitoringChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Calculator -->
+            <div class="card">
+                <h2 class="card-title">🧮 Калькулятор нейтрализации</h2>
+                
+                <div class="calculator">
+                    <div>
+                        <div class="input-group">
+                            <label class="input-label">Масса руды (кг)</label>
+                            <input type="number" class="input-field" id="oreMass" value="100" min="1">
+                        </div>
+                        
+                        <div class="input-group">
+                            <label class="input-label">Начальный pH</label>
+                            <input type="number" class="input-field" id="initialPH" value="1.8" min="0" max="14" step="0.1">
+                        </div>
+                        
+                        <div class="input-group">
+                            <label class="input-label">Целевой pH</label>
+                            <input type="number" class="input-field" id="targetPH" value="4.0" min="0" max="14" step="0.1">
+                        </div>
+                        
+                        <button class="calculate-btn" onclick="calculateNeutralization()">
+                            Рассчитать параметры
+                        </button>
+                    </div>
+                    
+                    <div id="calculationResults">
+                        <div class="result-box">
+                            <div class="result-title">Результаты расчета:</div>
+                            <div id="results-content">
+                                <p>Введите параметры и нажмите "Рассчитать"</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ore Composition -->
+            <div class="card">
+                <h2 class="card-title">🔬 Состав руды</h2>
+                
+                <div class="tabs">
+                    <button class="tab active" onclick="showCompositionTab('original', this)">Исходная руда</button>
+                    <button class="tab" onclick="showCompositionTab('processed', this)">После обработки</button>
+                </div>
+
+                <div id="original" class="tab-content active">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Элемент</th>
+                                <th>Содержание, %</th>
+                                <th>Примечание</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Cu</strong></td>
+                                <td><strong>1.027</strong></td>
+                                <td>Целевой металл</td>
+                            </tr>
+                            <tr>
+                                <td>Fe</td>
+                                <td>1.06</td>
+                                <td>Сопутствующий металл</td>
+                            </tr>
+                            <tr>
+                                <td>Si</td>
+                                <td>36.12</td>
+                                <td>Кварц</td>
+                            </tr>
+                            <tr>
+                                <td>O</td>
+                                <td>51.7</td>
+                                <td>Оксиды</td>
+                            </tr>
+                            <tr>
+                                <td>Al</td>
+                                <td>5.683</td>
+                                <td>Алюмосиликаты</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="processed" class="tab-content">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Минерал</th>
+                                <th>Формула</th>
+                                <th>Количество, %</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Кварц</td>
+                                <td>SiO₂</td>
+                                <td>51.1</td>
+                            </tr>
+                            <tr>
+                                <td>Альбит</td>
+                                <td>Na(AlSi₃O₈)</td>
+                                <td>29.1</td>
+                            </tr>
+                            <tr>
+                                <td>Мусковит</td>
+                                <td>KAl₂(Si,Al)₄O₁₀(OH)₂</td>
+                                <td>13.5</td>
+                            </tr>
+                            <tr>
+                                <td>Клинохлор</td>
+                                <td>(MgFe)((Si₅Al₃)O₂₀(OH)₁₆)</td>
+                                <td>6.3</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <p style="margin-top: 1rem; color: var(--primary-green);">
+                        <strong>Остаточное содержание Cu: 0.046%</strong> - экологически безопасный уровень
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}
+
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+
+<script>
+        // График pH
+        const phCtx = document.getElementById('phChart').getContext('2d');
+        const phChart = new Chart(phCtx, {
+            type: 'line',
+            data: {
+                labels: ['0%', '1%', '2%', '3%', '4%', '5%', '6%', '7%', '8%', '9%', '10%'],
+                datasets: [{
+                    label: 'pH промывной воды',
+                    data: [1.8, 2.2, 2.4, 2.7, 2.9, 3.1, 3.4, 3.6, 3.8, 4.0, 4.2],
+                    borderColor: '#22c55e',
+                    backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        labels: { color: '#e2e8f0' }
+                    }
+                },
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Соотношение вода/руда',
+                            color: '#e2e8f0'
+                        },
+                        ticks: { color: '#94a3b8' },
+                        grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'pH',
+                            color: '#e2e8f0'
+                        },
+                        ticks: { color: '#94a3b8' },
+                        grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                    }
+                }
+            }
+        });
+
+        // График концентраций
+        const concCtx = document.getElementById('concentrationChart').getContext('2d');
+        const concentrationChart = new Chart(concCtx, {
+            type: 'line',
+            data: {
+                labels: ['0%', '1%', '2%', '3%', '4%', '5%', '6%', '7%', '8%', '9%', '10%'],
+                datasets: [
+                    {
+                        label: 'Cu (г/л)',
+                        data: [0.125, 0.095, 0.075, 0.060, 0.048, 0.038, 0.030, 0.024, 0.020, 0.017, 0.015],
+                        borderColor: '#f59e0b',
+                        backgroundColor: 'rgba(245, 158, 11, 0.1)'
+                    },
+                    {
+                        label: 'Fe (г/л)',
+                        data: [3.27, 2.8, 2.4, 2.0, 1.7, 1.4, 1.0, 0.7, 0.4, 0.2, 0.1],
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)'
+                    },
+                    {
+                        label: 'H₂SO₄ (г/л)',
+                        data: [2.74, 2.5, 2.2, 1.9, 1.6, 1.3, 1.0, 0.8, 0.6, 0.5, 0.43],
+                        borderColor: '#22c55e',
+                        backgroundColor: 'rgba(34, 197, 94, 0.1)'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        labels: { color: '#e2e8f0' }
+                    }
+                },
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Соотношение вода/руда',
+                            color: '#e2e8f0'
+                        },
+                        ticks: { color: '#94a3b8' },
+                        grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Концентрация (г/л)',
+                            color: '#e2e8f0'
+                        },
+                        ticks: { color: '#94a3b8' },
+                        grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                    }
+                }
+            }
+        });
+
+        // График мониторинга
+        const monCtx = document.getElementById('monitoringChart').getContext('2d');
+        const monitoringChart = new Chart(monCtx, {
+            type: 'line',
+            data: {
+                labels: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11'],
+                datasets: [
+                    {
+                        label: 'pH почвенной воды',
+                        data: [6.8, 6.2, 6.3, 6.5, 6.6, 6.7, 6.8, 6.8, 6.8, 6.7, 6.7, 6.7],
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)'
+                    },
+                    {
+                        label: 'pH общего стока',
+                        data: [4.0, 4.5, 4.8, 5.1, 5.4, 5.6, 5.8, 6.0, 6.1, 6.3, 6.4, 6.5],
+                        borderColor: '#ea580c',
+                        backgroundColor: 'rgba(234, 88, 12, 0.1)'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        labels: { color: '#e2e8f0' }
+                    }
+                },
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Недели наблюдений',
+                            color: '#e2e8f0'
+                        },
+                        ticks: { color: '#94a3b8' },
+                        grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'pH',
+                            color: '#e2e8f0'
+                        },
+                        ticks: { color: '#94a3b8' },
+                        grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                    }
+                }
+            }
+        });
+
+        // Функции управления табами
+        function showTab(tabId, element) {
+            // Находим родительскую карточку
+            const parentCard = element.closest('.card');
+            
+            // Скрыть все табы в этой карточке
+            parentCard.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            parentCard.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Показать выбранный таб
+            document.getElementById(tabId).classList.add('active');
+            element.classList.add('active');
+        }
+
+        function showCompositionTab(tabId, element) {
+            // Находим родительскую карточку
+            const parentCard = element.closest('.card');
+            
+            // Скрыть все табы состава в этой карточке
+            parentCard.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            parentCard.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Показать выбранный таб
+            document.getElementById(tabId).classList.add('active');
+            element.classList.add('active');
+        }
+
+        // Калькулятор нейтрализации
+        function calculateNeutralization() {
+            const oreMass = parseFloat(document.getElementById('oreMass').value);
+            const initialPH = parseFloat(document.getElementById('initialPH').value);
+            const targetPH = parseFloat(document.getElementById('targetPH').value);
+            
+            // Расчеты на основе экспериментальных данных
+            const waterRatio = Math.max(0.1, (targetPH - initialPH) * 0.04); // Примерная формула
+            const waterVolume = oreMass * waterRatio;
+            const washingCycles = Math.ceil(waterRatio / 0.02); // По 2% за цикл
+            const timeEstimate = washingCycles * 0.5; // По 0.5 дня за цикл
+            
+            const cuReduction = ((1.027 - 0.11) / 1.027 * 100).toFixed(1);
+            const finalCuContent = (0.11 * (1 - waterRatio * 5)).toFixed(3); // Дополнительное снижение при промывке
+            
+            const resultsContent = `
+                <div style="display: grid; gap: 1rem;">
+                    <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                        <span>Требуемый объем воды:</span>
+                        <strong>${waterVolume.toFixed(1)} литров</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                        <span>Соотношение вода/руда:</span>
+                        <strong>${(waterRatio * 100).toFixed(1)}%</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                        <span>Количество циклов промывки:</span>
+                        <strong>${washingCycles}</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                        <span>Ориентировочное время:</span>
+                        <strong>${timeEstimate.toFixed(1)} дней</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                        <span>Извлечение Cu (гидрометаллургия):</span>
+                        <strong>${cuReduction}%</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding: 0.5rem 0;">
+                        <span>Финальное содержание Cu:</span>
+                        <strong>${finalCuContent}%</strong>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 1.5rem; padding: 1rem; background: rgba(34, 197, 94, 0.05); border-radius: 8px;">
+                    <h4 style="color: var(--primary-green); margin-bottom: 0.5rem;">💡 Рекомендации:</h4>
+                    <ul style="margin: 0; padding-left: 1.5rem; color: #cbd5e1;">
+                        <li>Используйте дренажную систему для сбора промывных вод</li>
+                        <li>Повторно применяйте промывные воды на других участках</li>
+                        <li>Контролируйте pH ежедневно во время промывки</li>
+                        <li>После достижения pH 4.0 можно начинать рекультивацию</li>
+                    </ul>
+                </div>
+            `;
+            
+            document.getElementById('results-content').innerHTML = resultsContent;
+        }
+
+        // Добавляем функцию для показа табов состава руды
+        document.addEventListener('DOMContentLoaded', function() {
+            // Инициализация графиков при загрузке
+            setTimeout(() => {
+                phChart.resize();
+                concentrationChart.resize();
+                monitoringChart.resize();
+            }, 100);
+        });
+
+        // Дополнительная функция для экспорта данных
+        function exportData() {
+            const data = {
+                projectMetrics: {
+                    copperExtraction: "89.3%",
+                    phChange: "1.8 → 6.5",
+                    observationWeeks: 11,
+                    finalCuContent: "0.046%"
+                },
+                phData: [1.8, 2.2, 2.4, 2.7, 2.9, 3.1, 3.4, 3.6, 3.8, 4.0, 4.2],
+                concentrationData: {
+                    cu: [0.125, 0.095, 0.075, 0.060, 0.048, 0.038, 0.030, 0.024, 0.020, 0.017, 0.015],
+                    fe: [3.27, 2.8, 2.4, 2.0, 1.7, 1.4, 1.0, 0.7, 0.4, 0.2, 0.1],
+                    h2so4: [2.74, 2.5, 2.2, 1.9, 1.6, 1.3, 1.0, 0.8, 0.6, 0.5, 0.43]
+                },
+                monitoringData: {
+                    soilPH: [6.8, 6.2, 6.3, 6.5, 6.6, 6.7, 6.8, 6.8, 6.8, 6.7, 6.7, 6.7],
+                    combinedPH: [4.0, 4.5, 4.8, 5.1, 5.4, 5.6, 5.8, 6.0, 6.1, 6.3, 6.4, 6.5]
+                }
+            };
+            
+            const dataStr = JSON.stringify(data, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'copper_waste_analysis_data.json';
+            link.click();
+        }
+
+        // Функция для обновления графиков в реальном времени (имитация)
+        function simulateRealTimeUpdate() {
+            setInterval(() => {
+                // Добавляем небольшие случайные изменения к последним точкам графиков
+                const lastIndex = monitoringChart.data.labels.length - 1;
+                const soilPH = monitoringChart.data.datasets[0].data[lastIndex];
+                const combinedPH = monitoringChart.data.datasets[1].data[lastIndex];
+                
+                // Небольшие случайные колебания (±0.1)
+                const newSoilPH = Math.max(6.0, Math.min(7.0, soilPH + (Math.random() - 0.5) * 0.2));
+                const newCombinedPH = Math.max(6.0, Math.min(7.0, combinedPH + (Math.random() - 0.5) * 0.1));
+                
+                monitoringChart.data.datasets[0].data[lastIndex] = parseFloat(newSoilPH.toFixed(1));
+                monitoringChart.data.datasets[1].data[lastIndex] = parseFloat(newCombinedPH.toFixed(1));
+                
+                monitoringChart.update('none');
+            }, 5000); // Обновление каждые 5 секунд
+        }
+
+        // Запуск симуляции после загрузки страницы
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => {
+                simulateRealTimeUpdate();
+            }, 2000);
+        });
+
+        // Функция для печати отчета
+        function printReport() {
+            window.print();
+        }
+
+        // Добавляем кнопки управления
+        function addControlButtons() {
+            const header = document.querySelector('.header');
+            const controlsDiv = document.createElement('div');
+            controlsDiv.innerHTML = `
+                <div style="margin-top: 2rem; display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                    <button onclick="exportData()" style="background: var(--gradient-primary); color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 8px; cursor: pointer; font-weight: 500;">
+                        📊 Экспорт данных
+                    </button>
+                    <button onclick="printReport()" style="background: var(--gradient-copper); color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 8px; cursor: pointer; font-weight: 500;">
+                        🖨️ Печать отчета
+                    </button>
+                    <button onclick="location.reload()" style="background: rgba(255,255,255,0.1); color: var(--text-light); border: 1px solid var(--glass-border); padding: 0.75rem 1.5rem; border-radius: 8px; cursor: pointer; font-weight: 500;">
+                        🔄 Обновить данные
+                    </button>
+                </div>
+            `;
+            header.appendChild(controlsDiv);
+        }
+
+        // Инициализация всех функций
+        document.addEventListener('DOMContentLoaded', function() {
+            addControlButtons();
+            
+            // Анимация появления карточек
+            const cards = document.querySelectorAll('.card');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                    card.style.transition = 'all 0.6s ease';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 200);
+            });
+        });
+</script>
+{% endblock extra_js %}

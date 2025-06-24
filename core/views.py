@@ -18,11 +18,11 @@ def home(request):
                 'url': 'flotation:dashboard'
             },
             {
-                'name': 'Процесс 2',
+                'name': 'Утилизация',
                 'icon': '⚗️',
-                'description': 'Второй металлургический процесс. Функционал будет добавлен после завершения модуля флотации.',
-                'status': 'coming',
-                'url': '#'
+                'description': 'Анализатор зеленой утилизации медных отвалов',
+                'status': 'active',
+                'url': 'core:copper'
             },
             {
                 'name': 'Процесс 3',
@@ -49,3 +49,7 @@ def knowledge_base(request):
 def reports(request):
     """Отчеты"""
     return render(request, 'core/reports.html')
+
+def copper(request):
+    """Медь"""
+    return render(request, 'core/copper.html')

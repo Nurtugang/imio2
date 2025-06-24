@@ -535,6 +535,154 @@ function saveTest() {
         saveButton.textContent = '💾 Сохранить тест';
     });
 }
+// Проверяем, нужно ли загрузить данные повторного теста
+document.addEventListener('DOMContentLoaded', function() {
+    // Проверяем URL параметр repeat
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('repeat') === 'true') {
+        loadRepeatTestData();
+    }
+});
+
+function loadRepeatTestData() {
+    // Получаем данные из sessionStorage
+    const testDataString = sessionStorage.getItem('repeatTestData');
+    if (testDataString) {
+        try {
+            const testData = JSON.parse(testDataString);
+            
+            // Загружаем данные в форму
+            fillFormWithTestData(testData);
+            
+            // Очищаем временные данные
+            sessionStorage.removeItem('repeatTestData');
+            
+            // Показываем уведомление
+            showNotification('Данные теста загружены. Вы можете изменить их и пересчитать.', 'success');
+            
+        } catch (error) {
+            console.error('Ошибка загрузки данных теста:', error);
+            showNotification('Ошибка загрузки данных теста', 'error');
+        }
+    }
+}
+
+function fillFormWithTestData(testData) {
+    // Заполняем основные поля
+    document.querySelector('input[name="initial_grade_analysis"]').value = testData.initial_grade_analysis;
+    document.querySelector('input[name="calculated_initial_grade"]').value = testData.calculated_initial_grade;
+    document.querySelector('textarea[name="reagent_regime"]').value = testData.reagent_regime;
+    document.querySelector('input[name="configuration"]').value = testData.configuration;
+    document.querySelector('input[name="is_microflotation"]').checked = testData.is_microflotation;
+    
+    // Заполняем продукты флотации
+    if (testData.products) {
+        // Финальный концентрат
+        if (testData.products.final_concentrate) {
+            document.querySelector('input[name="final_concentrate_mass"]').value = testData.products.final_concentrate.mass;
+            document.querySelector('input[name="final_concentrate_grade"]').value = testData.products.final_concentrate.grade;
+        }
+        
+        // Отвальные хвосты
+        if (testData.products.tails) {
+            document.querySelector('input[name="tails_mass"]').value = testData.products.tails.mass;
+            document.querySelector('input[name="tails_grade"]').value = testData.products.tails.grade;
+        }
+        
+        // Хвосты перечистки
+        if (testData.products.cleaner_tails) {
+            document.querySelector('input[name="cleaner_tails_mass"]').value = testData.products.cleaner_tails.mass;
+            document.querySelector('input[name="cleaner_tails_grade"]').value = testData.products.cleaner_tails.grade;
+        }
+        
+        // Концентрат контрольной
+        if (testData.products.control_concentrate) {
+            document.querySelector('input[name="control_concentrate_mass"]').value = testData.products.control_concentrate.mass;
+            document.querySelector('input[name="control_concentrate_grade"]').value = testData.products.control_concentrate.grade;
+        }
+    }
+    
+    // Автоматически пересчитываем результаты
+    setTimeout(() => {
+        calculateResults();
+    }, 500);
+}
+
+function showNotification(message, type = 'info') {
+    // Создаем элемент уведомления
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        position: fixed;
+        top: 100px;
+        right: 20px;
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: 12px;
+        padding: 1rem 1.5rem;
+        color: var(--text-light);
+        z-index: 10001;
+        animation: slideInRight 0.3s ease;
+        max-width: 350px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    `;
+    
+    // Иконка и цвет границы в зависимости от типа
+    let icon = '💡';
+    if (type === 'success') {
+        notification.style.borderColor = '#22c55e';
+        icon = '✅';
+    } else if (type === 'error') {
+        notification.style.borderColor = '#ef4444';
+        icon = '❌';
+    } else if (type === 'warning') {
+        notification.style.borderColor = '#f59e0b';
+        icon = '⚠️';
+    }
+    
+    notification.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <span style="font-size: 1.2rem;">${icon}</span>
+            <span>${message}</span>
+        </div>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Убираем уведомление через 4 секунды
+    setTimeout(() => {
+        notification.style.animation = 'fadeOut 0.3s ease';
+        setTimeout(() => {
+            if (document.body.contains(notification)) {
+                document.body.removeChild(notification);
+            }
+        }, 300);
+    }, 4000);
+}
+
+// Добавляем CSS анимации, если их еще нет
+if (!document.querySelector('#notification-styles')) {
+    const style = document.createElement('style');
+    style.id = 'notification-styles';
+    style.textContent = `
+    @keyframes slideInRight {
+        from { 
+            transform: translateX(100%); 
+            opacity: 0; 
+        }
+        to { 
+            transform: translateX(0); 
+            opacity: 1; 
+        }
+    }
+
+    @keyframes fadeOut {
+        from { opacity: 1; }
+        to { opacity: 0; }
+    }
+    `;
+    document.head.appendChild(style);
+}
 </script>
 
 <!-- CSRF токен для AJAX запросов -->

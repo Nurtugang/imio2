@@ -27,15 +27,15 @@
                         <a href="{% url 'flotation:dashboard' %}" class="dropdown-item {% if request.resolver_match.app_name == 'flotation' %}active{% endif %}">
                             🧪 Флотация
                         </a>
-                        <div class="dropdown-item disabled">⚗️ Процесс 2</div>
+                         <a href="{% url 'core:copper' %}" class="dropdown-item {% if request.resolver_match.app_name == 'flotation' %}active{% endif %}">
+                            ⚗️ Утилизация
+                        </a>
                         <div class="dropdown-item disabled">🔥 Процесс 3</div>
                         <div class="dropdown-item disabled">🏭 Процесс 4</div>
                     </div>
                 </li>
                 <li><a href="{% url 'core:knowledge_base' %}" class="{% if request.resolver_match.url_name == 'knowledge_base' %}active{% endif %}">База знаний</a></li>
                 <li><a href="{% url 'analytics:general' %}" class="{% if request.resolver_match.app_name == 'analytics' %}active{% endif %}">Аналитика</a></li>
-                <li><a href="{% url 'calculators:list' %}" class="{% if request.resolver_match.app_name == 'calculators' %}active{% endif %}">Калькуляторы</a></li>
-                <li><a href="{% url 'core:reports' %}" class="{% if request.resolver_match.url_name == 'reports' %}active{% endif %}">Отчеты</a></li>
             </ul>
             
             <!-- Мобильное меню -->

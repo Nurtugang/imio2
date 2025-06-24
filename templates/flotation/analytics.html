@@ -1,0 +1,1064 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Аналитика флотации - Metallurgy Lab{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/flotation.css' %}">
+<style>
+.analytics-container {
+    margin-top: 80px;
+    padding: 2rem;
+    max-width: 1400px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.analytics-hero {
+    text-align: center;
+    margin-bottom: 3rem;
+    margin-top: 5rem;
+}
+
+.analytics-title {
+    font-size: 3rem;
+    font-weight: 800;
+    background: linear-gradient(45deg, var(--primary-blue), var(--primary-purple), var(--accent-gold));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: glow 2s ease-in-out infinite alternate;
+    margin-bottom: 1rem;
+    padding-top: 2rem;
+}
+
+.analytics-subtitle {
+    font-size: 1.25rem;
+    color: #cbd5e1;
+    line-height: 1.6;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+/* Основные метрики */
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+    margin-bottom: 3rem;
+}
+
+.metric-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    padding: 2rem;
+    text-align: center;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.metric-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--gradient-primary);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+}
+
+.metric-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    border-color: var(--accent-gold);
+}
+
+.metric-card:hover::before {
+    transform: scaleX(1);
+}
+
+.metric-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    display: block;
+}
+
+.metric-value {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--accent-gold);
+    margin-bottom: 0.5rem;
+}
+
+.metric-label {
+    color: var(--text-light);
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.metric-description {
+    color: #94a3b8;
+    font-size: 0.9rem;
+}
+
+/* Секции аналитики */
+.analytics-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.analytics-section {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    padding: 2rem;
+    transition: all 0.3s ease;
+}
+
+.analytics-section:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.section-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-light);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.section-subtitle {
+    color: #94a3b8;
+    font-size: 0.9rem;
+}
+
+/* Графики */
+.chart-container {
+    position: relative;
+    height: 300px;
+    margin-bottom: 1rem;
+}
+
+.chart-canvas {
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 12px;
+}
+
+/* Таблицы данных */
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+}
+
+.data-table th,
+.data-table td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.data-table th {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--accent-gold);
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.data-table td {
+    color: var(--text-light);
+}
+
+.data-table tbody tr:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+/* Карточки статистики */
+.stats-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.stat-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+}
+
+.stat-item:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: var(--accent-gold);
+    transform: translateX(5px);
+}
+
+.stat-item-info h4 {
+    color: var(--text-light);
+    margin-bottom: 0.25rem;
+    font-size: 1rem;
+}
+
+.stat-item-meta {
+    color: #94a3b8;
+    font-size: 0.8rem;
+}
+
+.stat-item-value {
+    text-align: right;
+}
+
+.stat-value-main {
+    color: var(--accent-gold);
+    font-weight: 600;
+    font-size: 1.2rem;
+}
+
+.stat-value-sub {
+    color: #94a3b8;
+    font-size: 0.8rem;
+}
+
+/* Категории эффективности */
+.efficiency-categories {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.efficiency-category {
+    padding: 1rem;
+    border-radius: 12px;
+    text-align: center;
+    border: 2px solid;
+    transition: transform 0.3s ease;
+}
+
+.efficiency-category:hover {
+    transform: scale(1.05);
+}
+
+.category-excellent {
+    background: rgba(34, 197, 94, 0.1);
+    border-color: #22c55e;
+}
+
+.category-good {
+    background: rgba(59, 130, 246, 0.1);
+    border-color: #3b82f6;
+}
+
+.category-average {
+    background: rgba(251, 191, 36, 0.1);
+    border-color: #fbbf24;
+}
+
+.category-poor {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: #ef4444;
+}
+
+.category-count {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.category-label {
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.category-percentage {
+    font-size: 0.8rem;
+    opacity: 0.8;
+}
+
+/* Сравнение процессов */
+.process-comparison {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.process-card {
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    text-align: center;
+}
+
+.process-title {
+    color: var(--accent-gold);
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.process-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.process-stat {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9rem;
+}
+
+.process-stat-label {
+    color: #94a3b8;
+}
+
+.process-stat-value {
+    color: var(--text-light);
+    font-weight: 600;
+}
+
+/* Полноширинные секции */
+.full-width-section {
+    grid-column: 1 / -1;
+}
+
+/* Пустое состояние */
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: #94a3b8;
+}
+
+.empty-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+.empty-title {
+    font-size: 1.5rem;
+    color: var(--text-light);
+    margin-bottom: 1rem;
+}
+
+.empty-description {
+    margin-bottom: 2rem;
+    line-height: 1.6;
+}
+
+.btn-primary {
+    background: var(--gradient-primary);
+    color: white;
+    padding: 1rem 2rem;
+    border: none;
+    border-radius: 25px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    color: white;
+}
+
+/* Адаптивность */
+@media (max-width: 1024px) {
+    .analytics-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .efficiency-categories {
+        grid-template-columns: 1fr;
+    }
+    
+    .process-comparison {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .metrics-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .analytics-title {
+        font-size: 2.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .metrics-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .analytics-title {
+        font-size: 2rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero секция -->
+<section class="analytics-hero">
+    <h1 class="analytics-title">📊 Аналитика флотации</h1>
+    <p class="analytics-subtitle">
+        Комплексный анализ эффективности флотационных процессов, трендов извлечения и сравнительные исследования различных конфигураций
+    </p>
+</section>
+
+{% if no_data %}
+<!-- Пустое состояние -->
+<section class="empty-state">
+    <div class="empty-icon">📊</div>
+    <h2 class="empty-title">Нет данных для анализа</h2>
+    <p class="empty-description">
+        Для отображения аналитики необходимо создать флотационные тесты. 
+        Начните с создания первого теста через калькулятор флотации.
+    </p>
+    <a href="{% url 'flotation:calculator' %}" class="btn-primary">
+        🧮 Создать первый тест
+    </a>
+</section>
+
+{% else %}
+
+<!-- Основные метрики -->
+<section class="metrics-grid">
+    <div class="metric-card">
+        <span class="metric-icon">🧪</span>
+        <div class="metric-value">{{ total_tests }}</div>
+        <div class="metric-label">Всего тестов</div>
+        <div class="metric-description">Проведено экспериментов</div>
+    </div>
+    
+    <div class="metric-card">
+        <span class="metric-icon">📈</span>
+        <div class="metric-value">{{ avg_extraction|floatformat:1 }}%</div>
+        <div class="metric-label">Среднее извлечение</div>
+        <div class="metric-description">По всем тестам</div>
+    </div>
+    
+    <div class="metric-card">
+        <span class="metric-icon">⚡</span>
+        <div class="metric-value">{{ avg_efficiency|floatformat:1 }}%</div>
+        <div class="metric-label">Средняя эффективность</div>
+        <div class="metric-description">Обогащения</div>
+    </div>
+    
+    <div class="metric-card">
+        <span class="metric-icon">🎯</span>
+        <div class="metric-value">{{ success_rate|floatformat:0 }}%</div>
+        <div class="metric-label">Успешность</div>
+        <div class="metric-description">Тесты с извлечением ≥85%</div>
+    </div>
+    
+    <div class="metric-card">
+        <span class="metric-icon">🏆</span>
+        <div class="metric-value">{{ best_test.extraction|floatformat:1 }}%</div>
+        <div class="metric-label">Лучший результат</div>
+        <div class="metric-description">Тест №{{ best_test.number }}</div>
+    </div>
+    
+    <div class="metric-card">
+        <span class="metric-icon">📉</span>
+        <div class="metric-value">{{ worst_test.extraction|floatformat:1 }}%</div>
+        <div class="metric-label">Худший результат</div>
+        <div class="metric-description">Тест №{{ worst_test.number }}</div>
+    </div>
+</section>
+
+<!-- Основная аналитика -->
+<section class="analytics-grid">
+    <!-- Тренд извлечения -->
+    <div class="analytics-section">
+        <div class="section-header">
+            <div>
+                <h3 class="section-title">📈 Тренд показателей</h3>
+                <p class="section-subtitle">Динамика последних 20 тестов</p>
+            </div>
+        </div>
+        <div class="chart-container">
+            <canvas id="trendChart" class="chart-canvas"></canvas>
+        </div>
+    </div>
+
+    <!-- Распределение по эффективности -->
+    <div class="analytics-section">
+        <div class="section-header">
+            <div>
+                <h3 class="section-title">🎯 Распределение по извлечению</h3>
+                <p class="section-subtitle">Категории эффективности</p>
+            </div>
+        </div>
+        <div class="chart-container">
+            <canvas id="extractionHistogram" class="chart-canvas"></canvas>
+        </div>
+    </div>
+
+    <!-- Статистика по конфигурациям -->
+    <div class="analytics-section">
+        <div class="section-header">
+            <div>
+                <h3 class="section-title">🔧 Анализ конфигураций</h3>
+                <p class="section-subtitle">Сравнение эффективности</p>
+            </div>
+        </div>
+        
+        <div class="stats-list">
+            {% for config in extraction_by_config %}
+            <div class="stat-item">
+                <div class="stat-item-info">
+                    <h4>{{ config.configuration }}</h4>
+                    <div class="stat-item-meta">
+                        {{ config.count }} тест{{ config.count|pluralize:"ов" }}
+                        • Макс: {{ config.max_extraction|floatformat:1 }}%
+                        • Мин: {{ config.min_extraction|floatformat:1 }}%
+                    </div>
+                </div>
+                <div class="stat-item-value">
+                    <div class="stat-value-main">{{ config.avg_extraction|floatformat:1 }}%</div>
+                    <div class="stat-value-sub">среднее</div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Круговая диаграмма конфигураций -->
+    <div class="analytics-section">
+        <div class="section-header">
+            <div>
+                <h3 class="section-title">🥧 Распределение конфигураций</h3>
+                <p class="section-subtitle">Доли использования</p>
+            </div>
+        </div>
+        <div class="chart-container">
+            <canvas id="configPieChart" class="chart-canvas"></canvas>
+        </div>
+    </div>
+
+    <!-- Сравнение типов процессов -->
+    <div class="analytics-section full-width-section">
+        <div class="section-header">
+            <div>
+                <h3 class="section-title">⚖️ Сравнение процессов</h3>
+                <p class="section-subtitle">Микрофлотация vs Стандартная флотация</p>
+            </div>
+        </div>
+        
+        <div class="process-comparison">
+            <div class="process-card">
+                <div class="process-title">🔬 Микрофлотация</div>
+                <div class="process-stats">
+                    <div class="process-stat">
+                        <span class="process-stat-label">Тестов:</span>
+                        <span class="process-stat-value">{{ process_comparison.microflotation.count }}</span>
+                    </div>
+                    <div class="process-stat">
+                        <span class="process-stat-label">Среднее извлечение:</span>
+                        <span class="process-stat-value">{{ process_comparison.microflotation.avg_extraction|floatformat:1 }}%</span>
+                    </div>
+                    <div class="process-stat">
+                        <span class="process-stat-label">Средняя эффективность:</span>
+                        <span class="process-stat-value">{{ process_comparison.microflotation.avg_efficiency|floatformat:1 }}%</span>
+                    </div>
+                    <div class="process-stat">
+                        <span class="process-stat-label">Максимум:</span>
+                        <span class="process-stat-value">{{ process_comparison.microflotation.max_extraction|floatformat:1 }}%</span>
+                    </div>
+                    <div class="process-stat">
+                        <span class="process-stat-label">Минимум:</span>
+                        <span class="process-stat-value">{{ process_comparison.microflotation.min_extraction|floatformat:1 }}%</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="process-card">
+                <div class="process-title">⚗️ Стандартная флотация</div>
+                <div class="process-stats">
+                    <div class="process-stat">
+                        <span class="process-stat-label">Тестов:</span>
+                        <span class="process-stat-value">{{ process_comparison.standard.count }}</span>
+                    </div>
+                    <div class="process-stat">
+                        <span class="process-stat-label">Среднее извлечение:</span>
+                        <span class="process-stat-value">{{ process_comparison.standard.avg_extraction|floatformat:1 }}%</span>
+                    </div>
+                    <div class="process-stat">
+                        <span class="process-stat-label">Средняя эффективность:</span>
+                        <span class="process-stat-value">{{ process_comparison.standard.avg_efficiency|floatformat:1 }}%</span>
+                    </div>
+                    <div class="process-stat">
+                        <span class="process-stat-label">Максимум:</span>
+                        <span class="process-stat-value">{{ process_comparison.standard.max_extraction|floatformat:1 }}%</span>
+                    </div>
+                    <div class="process-stat">
+                        <span class="process-stat-label">Минимум:</span>
+                        <span class="process-stat-value">{{ process_comparison.standard.min_extraction|floatformat:1 }}%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Категории эффективности -->
+    <div class="analytics-section">
+        <div class="section-header">
+            <div>
+                <h3 class="section-title">📊 Категории эффективности</h3>
+                <p class="section-subtitle">Распределение тестов по результатам</p>
+            </div>
+        </div>
+        
+        <div class="efficiency-categories">
+            <div class="efficiency-category category-excellent">
+                <div class="category-count">{{ efficiency_categories.excellent.count }}</div>
+                <div class="category-label">Отличные</div>
+                <div class="category-percentage">≥90% ({{ efficiency_categories.excellent.percentage|floatformat:0 }}%)</div>
+            </div>
+            
+            <div class="efficiency-category category-good">
+                <div class="category-count">{{ efficiency_categories.good.count }}</div>
+                <div class="category-label">Хорошие</div>
+                <div class="category-percentage">80-89% ({{ efficiency_categories.good.percentage|floatformat:0 }}%)</div>
+            </div>
+            
+            <div class="efficiency-category category-average">
+                <div class="category-count">{{ efficiency_categories.average.count }}</div>
+                <div class="category-label">Средние</div>
+                <div class="category-percentage">70-79% ({{ efficiency_categories.average.percentage|floatformat:0 }}%)</div>
+            </div>
+            
+            <div class="efficiency-category category-poor">
+                <div class="category-count">{{ efficiency_categories.poor.count }}</div>
+                <div class="category-label">Слабые</div>
+                <div class="category-percentage"><70% ({{ efficiency_categories.poor.percentage|floatformat:0 }}%)</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Анализ реагентов -->
+    <div class="analytics-section">
+        <div class="section-header">
+            <div>
+                <h3 class="section-title">🧪 Эффективность реагентов</h3>
+                <p class="section-subtitle">Сравнение реагентных режимов</p>
+            </div>
+        </div>
+        
+        {% if reagent_effectiveness %}
+        <div class="stats-list">
+            {% for reagent in reagent_effectiveness %}
+            <div class="stat-item">
+                <div class="stat-item-info">
+                    <h4>{{ reagent.reagent }}</h4>
+                    <div class="stat-item-meta">{{ reagent.count }} тест{{ reagent.count|pluralize:"ов" }}</div>
+                </div>
+                <div class="stat-item-value">
+                    <div class="stat-value-main">{{ reagent.avg_extraction|floatformat:1 }}%</div>
+                    <div class="stat-value-sub">среднее</div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div style="text-align: center; padding: 2rem; color: #94a3b8;">
+            <p>Недостаточно данных для анализа реагентов</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Последние тесты -->
+    <div class="analytics-section full-width-section">
+        <div class="section-header">
+            <div>
+                <h3 class="section-title">🕒 Последние тесты</h3>
+                <p class="section-subtitle">10 недавних экспериментов</p>
+            </div>
+            <a href="{% url 'flotation:tests' %}" style="color: var(--accent-gold); text-decoration: none;">
+                Все тесты →
+            </a>
+        </div>
+        
+        {% if recent_tests %}
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>№</th>
+                    <th>Тип</th>
+                    <th>Конфигурация</th>
+                    <th>Извлечение</th>
+                    <th>Эффективность</th>
+                    <th>Выход</th>
+                    <th>Дата</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for test in recent_tests %}
+                <tr>
+                    <td style="font-weight: 600; color: var(--accent-gold);">{{ test.number }}</td>
+                    <td>
+                        {% if test.is_microflotation %}
+                            <span style="color: #3b82f6;">🔬 Микро</span>
+                        {% else %}
+                            <span style="color: #10b981;">⚗️ Стандарт</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ test.configuration|default:"—" }}</td>
+                    <td>
+                        <span style="font-weight: 600; 
+                            {% if test.extraction >= 90 %}color: #10b981;
+                            {% elif test.extraction >= 80 %}color: #3b82f6;
+                            {% elif test.extraction >= 70 %}color: #f59e0b;
+                            {% else %}color: #ef4444;{% endif %}">
+                            {{ test.extraction|floatformat:1 }}%
+                        </span>
+                    </td>
+                    <td>{{ test.efficiency|floatformat:1 }}%</td>
+                    <td>{{ test.concentrate_yield|floatformat:1 }}%</td>
+                    <td style="color: #94a3b8;">{{ test.date_conducted|date:"d.m.Y" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div style="text-align: center; padding: 2rem; color: #94a3b8;">
+            <p>Нет данных о последних тестах</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Топ тесты -->
+    {% if excellent_tests %}
+    <div class="analytics-section">
+        <div class="section-header">
+            <div>
+                <h3 class="section-title">🏆 Лучшие тесты</h3>
+                <p class="section-subtitle">Топ 5 по извлечению</p>
+            </div>
+        </div>
+        
+        <div class="stats-list">
+            {% for test in excellent_tests %}
+            <div class="stat-item">
+                <div class="stat-item-info">
+                    <h4>Тест №{{ test.number }}</h4>
+                    <div class="stat-item-meta">
+                        {{ test.configuration|default:"Стандартная" }}
+                        • {% if test.is_microflotation %}Микрофлотация{% else %}Стандартная{% endif %}
+                    </div>
+                </div>
+                <div class="stat-item-value">
+                    <div class="stat-value-main">{{ test.extraction|floatformat:1 }}%</div>
+                    <div class="stat-value-sub">{{ test.efficiency|floatformat:1 }}% эфф</div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Проблемные тесты -->
+    {% if poor_tests %}
+    <div class="analytics-section">
+        <div class="section-header">
+            <div>
+                <h3 class="section-title">⚠️ Проблемные тесты</h3>
+                <p class="section-subtitle">Требуют анализа причин</p>
+            </div>
+        </div>
+        
+        <div class="stats-list">
+            {% for test in poor_tests %}
+            <div class="stat-item">
+                <div class="stat-item-info">
+                    <h4>Тест №{{ test.number }}</h4>
+                    <div class="stat-item-meta">
+                        {{ test.configuration|default:"Стандартная" }}
+                        • {{ test.date_conducted|date:"d.m.Y" }}
+                    </div>
+                </div>
+                <div class="stat-item-value">
+                    <div class="stat-value-main" style="color: #ef4444;">{{ test.extraction|floatformat:1 }}%</div>
+                    <div class="stat-value-sub">низкое извлечение</div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</section>
+
+{% endif %}
+
+<!-- Подключаем Chart.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+
+<script>
+// Данные для графиков из Django
+const trendData = {{ trend_chart_data|safe }};
+const pieData = {{ config_pie_data|safe }};
+const histogramData = {{ extraction_histogram_data|safe }};
+
+// ГРАФИК ТРЕНДА ПОКАЗАТЕЛЕЙ
+if (document.getElementById('trendChart')) {
+    const trendCtx = document.getElementById('trendChart').getContext('2d');
+    const trendChart = new Chart(trendCtx, {
+        type: 'line',
+        data: {
+            labels: trendData.labels,
+            datasets: [
+                {
+                    label: 'Извлечение (%)',
+                    data: trendData.extraction_data,
+                    borderColor: '#10B981',
+                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: '#10B981',
+                    pointBorderColor: '#1e293b',
+                    pointBorderWidth: 2,
+                    pointRadius: 5
+                },
+                {
+                    label: 'Эффективность (%)',
+                    data: trendData.efficiency_data,
+                    borderColor: '#3B82F6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    borderWidth: 2,
+                    fill: false,
+                    tension: 0.4,
+                    pointBackgroundColor: '#3B82F6',
+                    pointBorderColor: '#1e293b',
+                    pointBorderWidth: 2,
+                    pointRadius: 4
+                },
+                {
+                    label: 'Выход (%)',
+                    data: trendData.yield_data,
+                    borderColor: '#F59E0B',
+                    backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                    borderWidth: 2,
+                    fill: false,
+                    tension: 0.4,
+                    pointBackgroundColor: '#F59E0B',
+                    pointBorderColor: '#1e293b',
+                    pointBorderWidth: 2,
+                    pointRadius: 4
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: '#cbd5e1',
+                        usePointStyle: true,
+                        padding: 20
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(30, 41, 59, 0.9)',
+                    titleColor: '#FFD700',
+                    bodyColor: '#cbd5e1',
+                    borderColor: '#FFD700',
+                    borderWidth: 1
+                }
+            },
+            scales: {
+                x: {
+                    ticks: {
+                        color: '#94a3b8',
+                        maxTicksLimit: 10
+                    },
+                    grid: {
+                        color: 'rgba(148, 163, 184, 0.1)'
+                    }
+                },
+                y: {
+                    ticks: {
+                        color: '#94a3b8',
+                        callback: function(value) {
+                            return value + '%';
+                        }
+                    },
+                    grid: {
+                        color: 'rgba(148, 163, 184, 0.1)'
+                    },
+                    min: 0,
+                    max: 100
+                }
+            },
+            interaction: {
+                intersect: false,
+                mode: 'index'
+            }
+        }
+    });
+}
+
+// КРУГОВАЯ ДИАГРАММА КОНФИГУРАЦИЙ
+if (document.getElementById('configPieChart')) {
+    const pieCtx = document.getElementById('configPieChart').getContext('2d');
+    const pieChart = new Chart(pieCtx, {
+        type: 'doughnut',
+        data: {
+            labels: pieData.labels,
+            datasets: [{
+                data: pieData.data,
+                backgroundColor: pieData.colors,
+                borderColor: '#1e293b',
+                borderWidth: 2,
+                hoverBorderWidth: 3,
+                hoverBorderColor: '#FFD700'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        color: '#cbd5e1',
+                        padding: 20,
+                        usePointStyle: true
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(30, 41, 59, 0.9)',
+                    titleColor: '#FFD700',
+                    bodyColor: '#cbd5e1',
+                    borderColor: '#FFD700',
+                    borderWidth: 1,
+                    callbacks: {
+                        label: function(context) {
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = ((context.parsed / total) * 100).toFixed(1);
+                            return context.label + ': ' + context.parsed + ' (' + percentage + '%)';
+                        }
+                    }
+                }
+            },
+            cutout: '60%'
+        }
+    });
+}
+
+// ГИСТОГРАММА ИЗВЛЕЧЕНИЯ
+if (document.getElementById('extractionHistogram')) {
+    const histCtx = document.getElementById('extractionHistogram').getContext('2d');
+    const histChart = new Chart(histCtx, {
+        type: 'bar',
+        data: {
+            labels: histogramData.labels,
+            datasets: [{
+                label: 'Количество тестов',
+                data: histogramData.data,
+                backgroundColor: histogramData.colors,
+                borderColor: histogramData.colors.map(color => color.replace('0.8', '1')),
+                borderWidth: 2,
+                borderRadius: 8,
+                borderSkipped: false
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(30, 41, 59, 0.9)',
+                    titleColor: '#FFD700',
+                    bodyColor: '#cbd5e1',
+                    borderColor: '#FFD700',
+                    borderWidth: 1
+                }
+            },
+            scales: {
+                x: {
+                    ticks: {
+                        color: '#94a3b8'
+                    },
+                    grid: {
+                        color: 'rgba(148, 163, 184, 0.1)'
+                    }
+                },
+                y: {
+                    ticks: {
+                        color: '#94a3b8',
+                        stepSize: 1
+                    },
+                    grid: {
+                        color: 'rgba(148, 163, 184, 0.1)'
+                    },
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+}
+
+// Анимация появления элементов при загрузке
+document.addEventListener('DOMContentLoaded', function() {
+    // Плавное появление метрик
+    const metricCards = document.querySelectorAll('.metric-card');
+    metricCards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        setTimeout(() => {
+            card.style.transition = 'all 0.6s ease';
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, index * 100);
+    });
+    
+    // Плавное появление секций
+    const sections = document.querySelectorAll('.analytics-section');
+    sections.forEach((section, index) => {
+        setTimeout(() => {
+            section.style.opacity = '0';
+            section.style.transform = 'translateY(30px)';
+            section.style.transition = 'all 0.8s ease';
+            
+            setTimeout(() => {
+                section.style.opacity = '1';
+                section.style.transform = 'translateY(0)';
+            }, 200);
+        }, index * 150);
+    });
+});
+</script>
+
+{% endblock %}
