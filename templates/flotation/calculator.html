@@ -3,379 +3,177 @@
 
 {% block title %}Калькулятор флотации - Metallurgy Lab{% endblock %}
 
-{% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/flotation.css' %}">
-<style>
-.calculator-container {
-    margin-top: 80px;
-    padding: 2rem;
-    max-width: 1400px;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-.calculator-hero {
-    text-align: center;
-    margin-bottom: 3rem;
-}
-
-.calculator-title {
-    font-size: 2.5rem;
-    font-weight: 800;
-    background: linear-gradient(45deg, var(--primary-blue), var(--accent-gold));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    margin-bottom: 1rem;
-}
-
-.calculator-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 2rem;
-    margin-bottom: 2rem;
-}
-
-.calculator-section {
-    background: var(--glass-bg);
-    backdrop-filter: blur(20px);
-    border: 1px solid var(--glass-border);
-    border-radius: 20px;
-    padding: 2rem;
-}
-
-.section-title {
-    font-size: 1.3rem;
-    font-weight: 600;
-    color: var(--text-light);
-    margin-bottom: 1.5rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.form-group {
-    margin-bottom: 1.5rem;
-}
-
-.form-label {
-    display: block;
-    color: var(--text-light);
-    font-weight: 500;
-    margin-bottom: 0.5rem;
-}
-
-.form-input {
-    width: 100%;
-    padding: 0.75rem;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 8px;
-    color: var(--text-light);
-    font-size: 1rem;
-}
-
-.form-input:focus {
-    outline: none;
-    border-color: var(--accent-gold);
-    box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.2);
-}
-
-.product-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-    margin-bottom: 1rem;
-}
-
-.product-card {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 12px;
-    padding: 1.5rem;
-}
-
-.product-title {
-    font-weight: 600;
-    color: var(--accent-gold);
-    margin-bottom: 1rem;
-    text-align: center;
-}
-
-.result-card {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid var(--accent-gold);
-    border-radius: 12px;
-    padding: 1.5rem;
-    margin-bottom: 1rem;
-}
-
-.result-value {
-    font-size: 2rem;
-    font-weight: 800;
-    color: var(--accent-gold);
-    text-align: center;
-    margin-bottom: 0.5rem;
-}
-
-.result-label {
-    text-align: center;
-    color: var(--text-light);
-    font-weight: 500;
-}
-
-.btn-calculate {
-    background: var(--gradient-primary);
-    color: white;
-    border: none;
-    padding: 1rem 2rem;
-    border-radius: 25px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    width: 100%;
-    margin-bottom: 1rem;
-}
-
-.btn-calculate:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
-}
-
-.btn-save {
-    background: var(--accent-gold);
-    color: var(--dark-bg);
-    border: none;
-    padding: 1rem 2rem;
-    border-radius: 25px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    width: 100%;
-}
-
-.btn-save:hover {
-    background: #e6c200;
-    transform: translateY(-2px);
-}
-
-.btn-save:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-.validations {
-    margin-top: 1rem;
-}
-
-.validation-item {
-    padding: 0.75rem;
-    border-radius: 8px;
-    margin-bottom: 0.5rem;
-}
-
-.validation-success {
-    background: rgba(34, 197, 94, 0.2);
-    border: 1px solid rgba(34, 197, 94, 0.3);
-    color: #86efac;
-}
-
-.validation-warning {
-    background: rgba(251, 191, 36, 0.2);
-    border: 1px solid rgba(251, 191, 36, 0.3);
-    color: #fbbf24;
-}
-
-.validation-error {
-    background: rgba(239, 68, 68, 0.2);
-    border: 1px solid rgba(239, 68, 68, 0.3);
-    color: #fca5a5;
-}
-
-.checkbox-group {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.checkbox-input {
-    width: auto;
-}
-
-@media (max-width: 768px) {
-    .calculator-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .product-grid {
-        grid-template-columns: 1fr;
-    }
-}
-</style>
-{% endblock %}
-
 {% block content %}
-<div class="calculator-container">
-    <!-- Hero секция -->
-    <div class="calculator-hero">
-        <h1 class="calculator-title">🧮 Калькулятор флотации</h1>
-        <p style="color: #cbd5e1; font-size: 1.1rem;">
-            Расчет показателей флотационного процесса с автоматическим сохранением результатов
-        </p>
-    </div>
+<div class="mt-20 max-w-7xl mx-auto px-6">
+  <!-- Hero -->
+  <div class="text-center mb-12">
+    <h1 class="text-4xl md:text-5xl font-extrabold mb-4 bg-gradient-to-r from-primary-blue to-accent-gold bg-clip-text text-transparent">
+      🧮 Калькулятор флотации
+    </h1>
+    <p class="text-slate-300 text-lg max-w-2xl mx-auto">
+      Расчет показателей флотационного процесса с автоматическим сохранением результатов
+    </p>
+  </div>
 
-    <!-- Основная сетка -->
-    <div class="calculator-grid">
-        <!-- Левая колонка - Ввод данных -->
-        <div class="calculator-section">
-            <h2 class="section-title">📝 Входные данные</h2>
-            
-            <form id="calculatorForm">
-                <!-- Исходные данные -->
-                <div class="form-group">
-                    <label class="form-label">Исходное содержание по анализу (г/т)</label>
-                    <input type="number" step="0.001" class="form-input" name="initial_grade_analysis" required>
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">Расчетное исходное содержание (г/т)</label>
-                    <input type="number" step="0.001" class="form-input" name="calculated_initial_grade" required>
-                </div>
+  <!-- Grid -->
+  <div class="grid md:grid-cols-2 gap-8">
+    <!-- Левая колонка -->
+    <div class="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-8">
+      <h2 class="text-xl font-semibold text-slate-100 mb-6 flex items-center gap-2">📝 Входные данные</h2>
 
-                <div class="form-group">
-                    <label class="form-label">Реагентный режим</label>
-                    <textarea class="form-input" name="reagent_regime" rows="3" placeholder="Например: Микрофлотация. Смесь: РАХ: 150+50 г/т; базовая подача: Х-133: 3+3 г/т"></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Конфигурация</label>
-                    <input type="text" class="form-input" name="configuration" placeholder="Конфигурация 1-2">
-                </div>
-
-                <div class="checkbox-group">
-                    <input type="checkbox" class="checkbox-input" name="is_microflotation" id="microflotation">
-                    <label class="form-label" for="microflotation">Микрофлотация</label>
-                </div>
-
-                <!-- Продукты флотации -->
-                <h3 style="color: var(--accent-gold); margin: 2rem 0 1rem 0;">Продукты флотации</h3>
-                
-                <div class="product-grid">
-                    <!-- Финальный концентрат -->
-                    <div class="product-card">
-                        <div class="product-title">🎯 Финальный концентрат</div>
-                        <div class="form-group">
-                            <label class="form-label">Масса (г)</label>
-                            <input type="number" step="0.01" class="form-input product-input" 
-                                   name="final_concentrate_mass" required>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Содержание (г/т)</label>
-                            <input type="number" step="0.001" class="form-input product-input" 
-                                   name="final_concentrate_grade" required>
-                        </div>
-                    </div>
-
-                    <!-- Отвальные хвосты -->
-                    <div class="product-card">
-                        <div class="product-title">📉 Отвальные хвосты</div>
-                        <div class="form-group">
-                            <label class="form-label">Масса (г)</label>
-                            <input type="number" step="0.01" class="form-input product-input" 
-                                   name="tails_mass" required>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Содержание (г/т)</label>
-                            <input type="number" step="0.001" class="form-input product-input" 
-                                   name="tails_grade" required>
-                        </div>
-                    </div>
-
-                    <!-- Хвосты перечистки -->
-                    <div class="product-card">
-                        <div class="product-title">🔄 Хвосты перечистки</div>
-                        <div class="form-group">
-                            <label class="form-label">Масса (г)</label>
-                            <input type="number" step="0.01" class="form-input product-input" 
-                                   name="cleaner_tails_mass" required>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Содержание (г/т)</label>
-                            <input type="number" step="0.001" class="form-input product-input" 
-                                   name="cleaner_tails_grade" required>
-                        </div>
-                    </div>
-
-                    <!-- Концентрат контрольной -->
-                    <div class="product-card">
-                        <div class="product-title">🔍 Концентрат контрольной</div>
-                        <div class="form-group">
-                            <label class="form-label">Масса (г)</label>
-                            <input type="number" step="0.01" class="form-input product-input" 
-                                   name="control_concentrate_mass" required>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Содержание (г/т)</label>
-                            <input type="number" step="0.001" class="form-input product-input" 
-                                   name="control_concentrate_grade" required>
-                        </div>
-                    </div>
-                </div>
-
-                <button type="button" class="btn-calculate" onclick="calculateResults()">
-                    🧮 Рассчитать показатели
-                </button>
-            </form>
+      <form id="calculatorForm" class="space-y-6">
+        <div>
+          <label class="block text-slate-200 font-medium mb-1">Исходное содержание по анализу (г/т)</label>
+          <input type="number" step="0.001" name="initial_grade_analysis"
+            class="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/20 text-slate-200 focus:outline-none focus:ring-2 focus:ring-accent-gold" required>
         </div>
 
-        <!-- Правая колонка - Результаты -->
-        <div class="calculator-section">
-            <h2 class="section-title">📊 Результаты расчета</h2>
-            
-            <div id="resultsContainer" style="display: none;">
-                <!-- Основные показатели -->
-                <div class="result-card">
-                    <div class="result-value" id="extraction">--</div>
-                    <div class="result-label">Извлечение (%)</div>
-                </div>
-
-                <div class="result-card">
-                    <div class="result-value" id="yield">--</div>
-                    <div class="result-label">Выход концентрата (%)</div>
-                </div>
-
-                <div class="result-card">
-                    <div class="result-value" id="efficiency">--</div>
-                    <div class="result-label">Эффективность обогащения (%)</div>
-                </div>
-
-                <!-- Материальный баланс -->
-                <div style="background: rgba(255,255,255,0.03); border-radius: 12px; padding: 1rem; margin-bottom: 1rem;">
-                    <h3 style="color: var(--accent-gold); margin-bottom: 1rem;">⚖️ Материальный баланс</h3>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; font-size: 0.9rem;">
-                        <div>Общая масса: <span id="totalMass">--</span> г</div>
-                        <div>Общее Au: <span id="totalAu">--</span> мкг</div>
-                    </div>
-                </div>
-
-                <!-- Валидация -->
-                <div id="validationsContainer" class="validations"></div>
-
-                <!-- Кнопка сохранения -->
-                <button type="button" class="btn-save" id="saveButton" onclick="saveTest()" disabled>
-                    💾 Сохранить тест
-                </button>
-
-                <div id="saveStatus" style="margin-top: 1rem; text-align: center;"></div>
-            </div>
-
-            <div id="noResults" style="text-align: center; color: #94a3b8; padding: 3rem;">
-                <div style="font-size: 3rem; margin-bottom: 1rem;">🧮</div>
-                <h3>Заполните данные и нажмите "Рассчитать"</h3>
-                <p>Система автоматически рассчитает все показатели флотации</p>
-            </div>
+        <div>
+          <label class="block text-slate-200 font-medium mb-1">Расчетное исходное содержание (г/т)</label>
+          <input type="number" step="0.001" name="calculated_initial_grade"
+            class="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/20 text-slate-200 focus:outline-none focus:ring-2 focus:ring-accent-gold" required>
         </div>
+
+        <div>
+          <label class="block text-slate-200 font-medium mb-1">Реагентный режим</label>
+          <textarea name="reagent_regime" rows="3" placeholder="Например: Микрофлотация. Смесь: РАХ: 150+50 г/т; базовая подача: Х-133: 3+3 г/т"
+            class="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/20 text-slate-200 focus:outline-none focus:ring-2 focus:ring-accent-gold"></textarea>
+        </div>
+
+        <div>
+          <label class="block text-slate-200 font-medium mb-1">Конфигурация</label>
+          <input type="text" name="configuration"
+            class="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/20 text-slate-200 focus:outline-none focus:ring-2 focus:ring-accent-gold">
+        </div>
+
+        <div class="flex items-center gap-2">
+          <input type="checkbox" id="microflotation" name="is_microflotation"
+            class="w-4 h-4 rounded border-white/20 bg-white/5 text-accent-gold focus:ring-accent-gold">
+          <label for="microflotation" class="text-slate-200">Микрофлотация</label>
+        </div>
+
+        <!-- Продукты -->
+        <h3 class="text-accent-gold font-semibold mt-8 mb-4">Продукты флотации</h3>
+        <div class="grid sm:grid-cols-2 gap-4">
+          <!-- Финальный концентрат -->
+          <div class="bg-white/5 border border-white/10 rounded-xl p-4">
+            <div class="text-accent-gold font-semibold text-center mb-3">🎯 Финальный концентрат</div>
+            <div class="space-y-3">
+              <div>
+                <label class="block text-slate-200 text-sm mb-1">Масса (г)</label>
+                <input type="number" step="0.01" name="final_concentrate_mass" required
+                  class="w-full px-3 py-2 rounded bg-white/5 border border-white/20 text-slate-200">
+              </div>
+              <div>
+                <label class="block text-slate-200 text-sm mb-1">Содержание (г/т)</label>
+                <input type="number" step="0.001" name="final_concentrate_grade" required
+                  class="w-full px-3 py-2 rounded bg-white/5 border border-white/20 text-slate-200">
+              </div>
+            </div>
+          </div>
+
+          <!-- Отвальные хвосты -->
+          <div class="bg-white/5 border border-white/10 rounded-xl p-4">
+            <div class="text-accent-gold font-semibold text-center mb-3">📉 Отвальные хвосты</div>
+            <div class="space-y-3">
+              <div>
+                <label class="block text-slate-200 text-sm mb-1">Масса (г)</label>
+                <input type="number" step="0.01" name="tails_mass" required
+                  class="w-full px-3 py-2 rounded bg-white/5 border border-white/20 text-slate-200">
+              </div>
+              <div>
+                <label class="block text-slate-200 text-sm mb-1">Содержание (г/т)</label>
+                <input type="number" step="0.001" name="tails_grade" required
+                  class="w-full px-3 py-2 rounded bg-white/5 border border-white/20 text-slate-200">
+              </div>
+            </div>
+          </div>
+
+          <!-- Хвосты перечистки -->
+          <div class="bg-white/5 border border-white/10 rounded-xl p-4">
+            <div class="text-accent-gold font-semibold text-center mb-3">🔄 Хвосты перечистки</div>
+            <div class="space-y-3">
+              <div>
+                <label class="block text-slate-200 text-sm mb-1">Масса (г)</label>
+                <input type="number" step="0.01" name="cleaner_tails_mass" required
+                  class="w-full px-3 py-2 rounded bg-white/5 border border-white/20 text-slate-200">
+              </div>
+              <div>
+                <label class="block text-slate-200 text-sm mb-1">Содержание (г/т)</label>
+                <input type="number" step="0.001" name="cleaner_tails_grade" required
+                  class="w-full px-3 py-2 rounded bg-white/5 border border-white/20 text-slate-200">
+              </div>
+            </div>
+          </div>
+
+          <!-- Контрольная -->
+          <div class="bg-white/5 border border-white/10 rounded-xl p-4">
+            <div class="text-accent-gold font-semibold text-center mb-3">🔍 Концентрат контрольной</div>
+            <div class="space-y-3">
+              <div>
+                <label class="block text-slate-200 text-sm mb-1">Масса (г)</label>
+                <input type="number" step="0.01" name="control_concentrate_mass" required
+                  class="w-full px-3 py-2 rounded bg-white/5 border border-white/20 text-slate-200">
+              </div>
+              <div>
+                <label class="block text-slate-200 text-sm mb-1">Содержание (г/т)</label>
+                <input type="number" step="0.001" name="control_concentrate_grade" required
+                  class="w-full px-3 py-2 rounded bg-white/5 border border-white/20 text-slate-200">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <button type="button" onclick="calculateResults()"
+          class="w-full py-3 rounded-full font-semibold bg-gradient-to-r from-primary-blue to-primary-purple text-white mt-6 hover:shadow-xl transition">
+          🧮 Рассчитать показатели
+        </button>
+      </form>
     </div>
+
+    <!-- Правая колонка -->
+    <div class="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-8">
+      <h2 class="text-xl font-semibold text-slate-100 mb-6 flex items-center gap-2">📊 Результаты расчета</h2>
+
+      <div id="resultsContainer" class="hidden">
+        <div class="bg-white/5 border border-accent-gold rounded-xl p-6 mb-4 text-center">
+          <div id="extraction" class="text-3xl font-extrabold text-accent-gold mb-1">--</div>
+          <div class="text-slate-200">Извлечение (%)</div>
+        </div>
+        <div class="bg-white/5 border border-accent-gold rounded-xl p-6 mb-4 text-center">
+          <div id="yield" class="text-3xl font-extrabold text-accent-gold mb-1">--</div>
+          <div class="text-slate-200">Выход концентрата (%)</div>
+        </div>
+        <div class="bg-white/5 border border-accent-gold rounded-xl p-6 mb-4 text-center">
+          <div id="efficiency" class="text-3xl font-extrabold text-accent-gold mb-1">--</div>
+          <div class="text-slate-200">Эффективность обогащения (%)</div>
+        </div>
+
+        <div class="bg-white/5 rounded-xl p-4 mb-4">
+          <h3 class="text-accent-gold mb-3">⚖️ Материальный баланс</h3>
+          <div class="grid grid-cols-2 gap-2 text-slate-300 text-sm">
+            <div>Общая масса: <span id="totalMass">--</span> г</div>
+            <div>Общее Au: <span id="totalAu">--</span> мкг</div>
+          </div>
+        </div>
+
+        <div id="validationsContainer" class="space-y-2 mb-4"></div>
+
+        <button id="saveButton" onclick="saveTest()" disabled
+          class="w-full py-3 rounded-full font-semibold bg-accent-gold text-dark-bg hover:bg-yellow-500 transition">
+          💾 Сохранить тест
+        </button>
+
+        <div id="saveStatus" class="mt-4 text-center text-slate-300"></div>
+      </div>
+
+      <div id="noResults" class="text-center text-slate-400 py-12">
+        <div class="text-4xl mb-2">🧮</div>
+        <h3 class="text-lg text-slate-200 mb-2">Заполните данные и нажмите "Рассчитать"</h3>
+        <p>Система автоматически рассчитает все показатели флотации</p>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>

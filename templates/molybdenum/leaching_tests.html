@@ -1,0 +1,242 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Тесты выщелачивания - Metallurgy Lab{% endblock %}
+
+{% block content %}
+<div class="pt-24 pb-16 px-4 max-w-7xl mx-auto">
+    
+    <!-- Header -->
+    <div class="text-center mb-8">
+        <h1 class="text-4xl font-bold mb-2 bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">
+            Тесты выщелачивания
+        </h1>
+        <p class="text-slate-300">Все опыты по кислотному выщелачиванию молибденитового концентрата</p>
+    </div>
+
+    <!-- Статистика -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div class="bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl p-4 text-center">
+            <div class="text-3xl font-bold text-amber-500">{{ test_stats.total }}</div>
+            <div class="text-sm text-slate-400">Всего тестов</div>
+        </div>
+        <div class="bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl p-4 text-center">
+            <div class="text-3xl font-bold text-green-400">{{ test_stats.with_oxygen }}</div>
+            <div class="text-sm text-slate-400">С O₂</div>
+        </div>
+        <div class="bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl p-4 text-center">
+            <div class="text-3xl font-bold text-blue-400">{{ test_stats.avg_extraction|floatformat:1 }}%</div>
+            <div class="text-sm text-slate-400">Среднее извлечение</div>
+        </div>
+        <div class="bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl p-4 text-center">
+            <div class="text-3xl font-bold text-purple-400">
+                {% if test_stats.best_test %}{{ test_stats.best_test.mo_extraction_to_solution|floatformat:1 }}%{% else %}--{% endif %}
+            </div>
+            <div class="text-sm text-slate-400">Лучший результат</div>
+        </div>
+    </div>
+
+    <!-- Фильтры -->
+    <div class="bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl p-6 mb-6">
+        <form method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div>
+                <label class="block text-sm text-slate-300 mb-2">Тип кислоты</label>
+                <select name="acid_type" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-slate-100">
+                    <option value="">Все</option>
+                    {% for code, name in acid_types %}
+                    <option value="{{ code }}" {% if filters.acid_type == code %}selected{% endif %}>{{ name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div>
+                <label class="block text-sm text-slate-300 mb-2">Продувка O₂</label>
+                <select name="has_oxygen" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-slate-100">
+                    <option value="">Все</option>
+                    <option value="1" {% if filters.has_oxygen == '1' %}selected{% endif %}>С кислородом</option>
+                    <option value="0" {% if filters.has_oxygen == '0' %}selected{% endif %}>Без кислорода</option>
+                </select>
+            </div>
+            
+            <div>
+                <label class="block text-sm text-slate-300 mb-2">Мин. извлечение Mo (%)</label>
+                <input type="number" name="min_extraction" value="{{ filters.min_extraction }}" 
+                       class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-slate-100"
+                       placeholder="0" step="0.1" min="0" max="100">
+            </div>
+            
+            <div class="flex items-end gap-2">
+                <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition-colors">
+                    Применить
+                </button>
+                <a href="{% url 'molybdenum:leaching_tests' %}" class="bg-slate-700 hover:bg-slate-600 text-white py-2 px-4 rounded-lg transition-colors">
+                    Сброс
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Таблица тестов -->
+    <div class="bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-slate-900/50">
+                    <tr>
+                        <th class="px-4 py-3 text-left text-sm font-semibold text-slate-300">№</th>
+                        <th class="px-4 py-3 text-left text-sm font-semibold text-slate-300">Кислота</th>
+                        <th class="px-4 py-3 text-center text-sm font-semibold text-slate-300">O₂</th>
+                        <th class="px-4 py-3 text-center text-sm font-semibold text-slate-300">T, °C</th>
+                        <th class="px-4 py-3 text-center text-sm font-semibold text-slate-300">τ, ч</th>
+                        <th class="px-4 py-3 text-center text-sm font-semibold text-slate-300">Mo → раствор</th>
+                        <th class="px-4 py-3 text-center text-sm font-semibold text-slate-300">Mo → кек</th>
+                        <th class="px-4 py-3 text-center text-sm font-semibold text-slate-300">Действия</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-800">
+                    {% for test in tests %}
+                    <tr class="hover:bg-white/5 transition-colors">
+                        <td class="px-4 py-3 text-amber-400 font-bold">{{ test.number }}</td>
+                        <td class="px-4 py-3 text-slate-200">{{ test.get_acid_type_display }}</td>
+                        <td class="px-4 py-3 text-center">
+                            {% if test.has_oxygen %}
+                            <span class="text-green-400">✓</span>
+                            {% else %}
+                            <span class="text-slate-600">—</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-4 py-3 text-center text-slate-300">{{ test.temperature }}</td>
+                        <td class="px-4 py-3 text-center text-slate-300">{{ test.duration }}</td>
+                        <td class="px-4 py-3 text-center">
+                            <span class="font-bold {% if test.mo_extraction_to_solution >= 70 %}text-green-400{% elif test.mo_extraction_to_solution >= 50 %}text-blue-400{% else %}text-amber-400{% endif %}">
+                                {{ test.mo_extraction_to_solution|floatformat:1 }}%
+                            </span>
+                        </td>
+                        <td class="px-4 py-3 text-center text-red-400">
+                            {{ test.mo_extraction_to_cake|floatformat:1 }}%
+                        </td>
+                        <td class="px-4 py-3 text-center">
+                            <button onclick="showTestDetail({{ test.id }})" 
+                                    class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm transition-colors">
+                                Детали
+                            </button>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="px-4 py-8 text-center text-slate-400">
+                            Тесты не найдены. <a href="{% url 'molybdenum:leaching_calculator' %}" class="text-amber-400 hover:underline">Создать первый тест</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Кнопка добавить тест -->
+    <div class="mt-6 text-center">
+        <a href="{% url 'molybdenum:leaching_calculator' %}" 
+           class="inline-block bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-3 px-8 rounded-xl transition-all">
+            + Создать новый тест
+        </a>
+    </div>
+</div>
+
+<!-- Модальное окно -->
+<div id="testModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4" onclick="closeModal()">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto" onclick="event.stopPropagation()">
+        <div class="p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-slate-100">Опыт №<span id="modalTestNumber">--</span></h2>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-slate-200 text-2xl">×</button>
+            </div>
+            
+            <div id="modalContent" class="space-y-6">
+                <div class="text-center text-slate-400 py-8">Загрузка...</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function showTestDetail(testId) {
+    document.getElementById('testModal').classList.remove('hidden');
+    
+    fetch(`/molybdenum/leaching-test/${testId}/`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                displayTestDetail(data.test);
+            } else {
+                alert('Ошибка загрузки: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Ошибка сети');
+        });
+}
+
+function displayTestDetail(test) {
+    document.getElementById('modalTestNumber').textContent = test.number;
+    
+    const content = `
+        <div class="grid grid-cols-2 gap-4 mb-6">
+            <div class="bg-green-500/20 border border-green-500/40 rounded-xl p-4 text-center">
+                <div class="text-sm text-green-300 mb-1">Mo в раствор</div>
+                <div class="text-4xl font-bold text-green-400">${test.mo_extraction_to_solution.toFixed(1)}%</div>
+            </div>
+            <div class="bg-red-500/20 border border-red-500/40 rounded-xl p-4 text-center">
+                <div class="text-sm text-red-300 mb-1">Mo в кек</div>
+                <div class="text-4xl font-bold text-red-400">${test.mo_extraction_to_cake.toFixed(1)}%</div>
+            </div>
+        </div>
+        
+        <div class="bg-slate-800/50 rounded-xl p-4 mb-4">
+            <h3 class="font-bold text-amber-400 mb-3">Условия выщелачивания</h3>
+            <div class="grid grid-cols-2 gap-3 text-sm">
+                <div><span class="text-slate-400">Кислота:</span> <span class="text-slate-200">${test.acid_type}</span></div>
+                <div><span class="text-slate-400">Продувка O₂:</span> <span class="text-slate-200">${test.has_oxygen ? 'Да' : 'Нет'}</span></div>
+                <div><span class="text-slate-400">Температура:</span> <span class="text-slate-200">${test.temperature}°C</span></div>
+                <div><span class="text-slate-400">Время:</span> <span class="text-slate-200">${test.duration} ч</span></div>
+                <div><span class="text-slate-400">Т:Ж:</span> <span class="text-slate-200">${test.solid_liquid_ratio}</span></div>
+                <div><span class="text-slate-400">Перемешивание:</span> <span class="text-slate-200">${test.stirring_speed} об/мин</span></div>
+            </div>
+        </div>
+        
+        <div class="bg-slate-800/50 rounded-xl p-4">
+            <h3 class="font-bold text-amber-400 mb-3">Исходный концентрат</h3>
+            <div class="grid grid-cols-4 gap-3 text-sm text-center">
+                <div>
+                    <div class="text-slate-400 text-xs mb-1">Mo</div>
+                    <div class="text-slate-200 font-semibold">${test.initial_mo.toFixed(2)}%</div>
+                </div>
+                <div>
+                    <div class="text-slate-400 text-xs mb-1">Cu</div>
+                    <div class="text-slate-200 font-semibold">${test.initial_cu.toFixed(2)}%</div>
+                </div>
+                <div>
+                    <div class="text-slate-400 text-xs mb-1">Fe</div>
+                    <div class="text-slate-200 font-semibold">${test.initial_fe.toFixed(2)}%</div>
+                </div>
+                <div>
+                    <div class="text-slate-400 text-xs mb-1">Si</div>
+                    <div class="text-slate-200 font-semibold">${test.initial_si.toFixed(2)}%</div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('modalContent').innerHTML = content;
+}
+
+function closeModal() {
+    document.getElementById('testModal').classList.add('hidden');
+}
+
+// Закрытие по Escape
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeModal();
+});
+</script>
+{% endblock %}

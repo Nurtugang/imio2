@@ -18,8 +18,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'core',
     'flotation',
-    'analytics',
-    'calculators',
+    'molybdenum',
 ]
 
 MIDDLEWARE = [
@@ -86,6 +85,7 @@ USE_TZ = True
 
 
 STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [
     BASE_DIR / 'static',
 ]

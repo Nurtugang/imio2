@@ -5,6 +5,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('core.urls')),
     path('flotation/', include('flotation.urls')),
-    path('analytics/', include('analytics.urls')),
-    path('calculators/', include('calculators.urls')),
+    path('molybdenum/', include('molybdenum.urls')),
 ]

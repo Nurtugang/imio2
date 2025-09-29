@@ -1,0 +1,527 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Калькулятор выщелачивания - Metallurgy Lab{% endblock %}
+
+{% block content %}
+<div class="pt-24 pb-16 px-4 max-w-7xl mx-auto">
+    <!-- Header -->
+    <div class="text-center mb-12">
+        <h1 class="text-4xl md:text-5xl font-extrabold mb-4 bg-gradient-to-r from-blue-500 via-purple-600 to-amber-500 bg-clip-text text-transparent">
+            🧮 Калькулятор выщелачивания
+        </h1>
+        <p class="text-xl text-slate-300 max-w-3xl mx-auto">
+            Расчет материального баланса и извлечений элементов при кислотном выщелачивании молибденитового концентрата
+        </p>
+    </div>
+
+    <!-- Main Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        
+        <!-- Left Column - Input Form -->
+        <div class="space-y-6">
+            
+            <!-- Исходный концентрат -->
+            <div class="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-6">
+                <h2 class="text-xl font-bold text-slate-100 mb-4 flex items-center gap-2">
+                    <span class="text-2xl">⚗️</span>
+                    Исходный концентрат
+                </h2>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-300 mb-2">Масса концентрата (г)</label>
+                        <input type="number" id="concentrate_mass" step="0.01" 
+                               class="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-3 text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
+                               placeholder="50" value="50">
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-300 mb-2">Mo (%)</label>
+                            <input type="number" id="initial_mo" step="0.01" 
+                                   class="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-3 text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                                   placeholder="20.3" value="20.3">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-300 mb-2">Cu (%)</label>
+                            <input type="number" id="initial_cu" step="0.01" 
+                                   class="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-3 text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                                   placeholder="1.99" value="1.99">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-300 mb-2">Fe (%)</label>
+                            <input type="number" id="initial_fe" step="0.01" 
+                                   class="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-3 text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                                   placeholder="2.33" value="2.33">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-300 mb-2">Si (%)</label>
+                            <input type="number" id="initial_si" step="0.01" 
+                                   class="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-3 text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                                   placeholder="2.47" value="2.47">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Условия выщелачивания -->
+            <div class="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-6">
+                <h2 class="text-xl font-bold text-slate-100 mb-4 flex items-center gap-2">
+                    <span class="text-2xl">🌡️</span>
+                    Условия выщелачивания
+                </h2>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-300 mb-2">Тип кислоты</label>
+                        <select id="acid_type" 
+                                class="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-3 text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent">
+                            {% for code, name in acid_types %}
+                            <option value="{{ code }}">{{ name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div id="hno3_block">
+                        <label class="block text-sm font-medium text-slate-300 mb-2">Концентрация HNO₃ (г/л)</label>
+                        <input type="number" id="hno3_concentration" step="1" 
+                               class="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-3 text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                               placeholder="50" value="50">
+                    </div>
+                    
+                    <div id="h2so4_block" style="display: none;">
+                        <label class="block text-sm font-medium text-slate-300 mb-2">Концентрация H₂SO₄ (г/л)</label>
+                        <input type="number" id="h2so4_concentration" step="1" 
+                               class="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-3 text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                               placeholder="200" value="200">
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-300 mb-2">Объем раствора (мл)</label>
+                            <input type="number" id="solution_volume" step="1" 
+                                   class="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-3 text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                                   placeholder="300" value="300">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-300 mb-2">Температура (°C)</label>
+                            <input type="number" id="temperature" step="1" 
+                                   class="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-3 text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                                   placeholder="95" value="95">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-300 mb-2">Продолжительность (ч)</label>
+                            <input type="number" id="duration" step="0.1" 
+                                   class="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-3 text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                                   placeholder="4" value="4">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-300 mb-2">Скорость перемешивания (об/мин)</label>
+                            <input type="number" id="stirring_speed" step="10" 
+                                   class="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-3 text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                                   placeholder="300" value="300">
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center gap-3 p-4 bg-slate-900/50 rounded-lg">
+                        <input type="checkbox" id="has_oxygen" class="w-5 h-5 rounded border-slate-700 bg-slate-900 text-amber-500 focus:ring-2 focus:ring-amber-500">
+                        <label for="has_oxygen" class="text-slate-300 font-medium cursor-pointer">Продувка кислородом</label>
+                    </div>
+                    
+                    <div id="oxygen_block" style="display: none;">
+                        <label class="block text-sm font-medium text-slate-300 mb-2">Расход O₂ (дм³/мин)</label>
+                        <input type="number" id="oxygen_flow" step="0.01" 
+                               class="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-3 text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                               placeholder="0.85" value="0.85">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Продукты выщелачивания -->
+            <div class="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-6">
+                <h2 class="text-xl font-bold text-slate-100 mb-4 flex items-center gap-2">
+                    <span class="text-2xl">📊</span>
+                    Продукты выщелачивания
+                </h2>
+                
+                <div class="space-y-6">
+                    <!-- Кек -->
+                    <div class="bg-red-500/10 border border-red-500/30 rounded-xl p-4">
+                        <h3 class="font-bold text-red-400 mb-3">Кек</h3>
+                        <div class="space-y-3">
+                            <div>
+                                <label class="block text-sm font-medium text-slate-300 mb-2">Масса (г)</label>
+                                <input type="number" id="cake_mass" step="0.01" 
+                                       class="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-2 text-slate-100 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                                       placeholder="43.5">
+                            </div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs text-slate-400 mb-1">Mo (%)</label>
+                                    <input type="number" id="cake_mo" step="0.01" 
+                                           class="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-red-500"
+                                           placeholder="18.86">
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-slate-400 mb-1">Cu (%)</label>
+                                    <input type="number" id="cake_cu" step="0.01" 
+                                           class="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-red-500"
+                                           placeholder="0.508">
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-slate-400 mb-1">Fe (%)</label>
+                                    <input type="number" id="cake_fe" step="0.01" 
+                                           class="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-red-500"
+                                           placeholder="0.611">
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-slate-400 mb-1">Si (%)</label>
+                                    <input type="number" id="cake_si" step="0.01" 
+                                           class="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-red-500"
+                                           placeholder="1.74">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Раствор -->
+                    <div class="bg-green-500/10 border border-green-500/30 rounded-xl p-4">
+                        <h3 class="font-bold text-green-400 mb-3">Раствор (фильтрат)</h3>
+                        <div class="space-y-3">
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs text-slate-400 mb-1">Mo (г/л)</label>
+                                    <input type="number" id="solution_mo" step="0.01" 
+                                           class="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-green-500"
+                                           placeholder="6.5">
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-slate-400 mb-1">Cu (г/л)</label>
+                                    <input type="number" id="solution_cu" step="0.01" 
+                                           class="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-green-500"
+                                           placeholder="2.58">
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-slate-400 mb-1">Fe (г/л)</label>
+                                    <input type="number" id="solution_fe" step="0.01" 
+                                           class="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-green-500"
+                                           placeholder="3.01">
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-slate-400 mb-1">Si (г/л)</label>
+                                    <input type="number" id="solution_si" step="0.01" 
+                                           class="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-green-500"
+                                           placeholder="1.61">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Кнопка расчета -->
+            <button onclick="calculateLeaching()" 
+                    class="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-2xl flex items-center justify-center gap-2">
+                <span class="text-xl">🧮</span>
+                <span>Рассчитать баланс</span>
+            </button>
+        </div>
+
+        <!-- Right Column - Results -->
+        <div class="space-y-6">
+            
+            <!-- Результаты (скрыты до расчета) -->
+            <div id="resultsContainer" style="display: none;">
+                
+                <!-- Основные показатели -->
+                <div class="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-6">
+                    <h2 class="text-xl font-bold text-slate-100 mb-4 flex items-center gap-2">
+                        <span class="text-2xl">📈</span>
+                        Извлечение Mo
+                    </h2>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-green-500/20 border border-green-500/40 rounded-xl p-4 text-center">
+                            <div class="text-sm text-green-300 mb-1">В раствор</div>
+                            <div class="text-4xl font-extrabold text-green-400" id="mo_to_solution">--</div>
+                        </div>
+                        <div class="bg-red-500/20 border border-red-500/40 rounded-xl p-4 text-center">
+                            <div class="text-sm text-red-300 mb-1">В кек</div>
+                            <div class="text-4xl font-extrabold text-red-400" id="mo_to_cake">--</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Материальный баланс -->
+                <div class="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-6">
+                    <h2 class="text-xl font-bold text-slate-100 mb-4 flex items-center gap-2">
+                        <span class="text-2xl">⚖️</span>
+                        Материальный баланс
+                    </h2>
+                    
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center p-3 bg-slate-900/50 rounded-lg">
+                            <span class="text-slate-300">Выход кека:</span>
+                            <span class="font-bold text-amber-400" id="cake_yield">--%</span>
+                        </div>
+                        <div class="flex justify-between items-center p-3 bg-slate-900/50 rounded-lg">
+                            <span class="text-slate-300">Т:Ж:</span>
+                            <span class="font-bold text-amber-400" id="solid_liquid_ratio">--</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Таблица извлечений -->
+                <div class="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-6">
+                    <h2 class="text-xl font-bold text-slate-100 mb-4">Извлечения элементов (%)</h2>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead>
+                                <tr class="border-b border-slate-700">
+                                    <th class="text-left py-2 px-3 text-slate-300">Элемент</th>
+                                    <th class="text-center py-2 px-3 text-green-400">В раствор</th>
+                                    <th class="text-center py-2 px-3 text-red-400">В кек</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-800">
+                                <tr>
+                                    <td class="py-2 px-3 font-semibold text-slate-100">Mo</td>
+                                    <td class="text-center py-2 px-3 text-green-300" id="mo_sol_extract">--</td>
+                                    <td class="text-center py-2 px-3 text-red-300" id="mo_cake_extract">--</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-2 px-3 font-semibold text-slate-100">Cu</td>
+                                    <td class="text-center py-2 px-3 text-green-300" id="cu_sol_extract">--</td>
+                                    <td class="text-center py-2 px-3 text-red-300" id="cu_cake_extract">--</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-2 px-3 font-semibold text-slate-100">Fe</td>
+                                    <td class="text-center py-2 px-3 text-green-300" id="fe_sol_extract">--</td>
+                                    <td class="text-center py-2 px-3 text-red-300" id="fe_cake_extract">--</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-2 px-3 font-semibold text-slate-100">Si</td>
+                                    <td class="text-center py-2 px-3 text-green-300" id="si_sol_extract">--</td>
+                                    <td class="text-center py-2 px-3 text-red-300" id="si_cake_extract">--</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Кнопка сохранения -->
+                <button onclick="saveTest()" 
+                        class="w-full bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-2xl flex items-center justify-center gap-2">
+                    <span class="text-xl">💾</span>
+                    <span>Сохранить тест</span>
+                </button>
+
+                <div id="saveStatus" class="text-center text-sm"></div>
+            </div>
+
+            <!-- Placeholder до расчета -->
+            <div id="noResults" class="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-12 text-center">
+                <div class="text-6xl mb-4">🧮</div>
+                <h3 class="text-2xl font-bold text-slate-200 mb-2">Заполните данные</h3>
+                <p class="text-slate-400">Введите параметры выщелачивания и нажмите "Рассчитать баланс"</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% csrf_token %}
+
+<script>
+// Переключение полей в зависимости от типа кислоты
+document.getElementById('acid_type').addEventListener('change', function() {
+    const acidType = this.value;
+    const hno3Block = document.getElementById('hno3_block');
+    const h2so4Block = document.getElementById('h2so4_block');
+    
+    if (acidType === 'hno3') {
+        hno3Block.style.display = 'block';
+        h2so4Block.style.display = 'none';
+    } else if (acidType === 'h2so4') {
+        hno3Block.style.display = 'none';
+        h2so4Block.style.display = 'block';
+    } else if (acidType === 'mixed') {
+        hno3Block.style.display = 'block';
+        h2so4Block.style.display = 'block';
+    }
+});
+
+// Переключение блока кислорода
+document.getElementById('has_oxygen').addEventListener('change', function() {
+    document.getElementById('oxygen_block').style.display = this.checked ? 'block' : 'none';
+});
+
+// Функция расчета
+async function calculateLeaching() {
+    const data = {
+        concentrate_mass: parseFloat(document.getElementById('concentrate_mass').value),
+        initial_mo: parseFloat(document.getElementById('initial_mo').value),
+        initial_cu: parseFloat(document.getElementById('initial_cu').value),
+        initial_fe: parseFloat(document.getElementById('initial_fe').value),
+        initial_si: parseFloat(document.getElementById('initial_si').value),
+        acid_type: document.getElementById('acid_type').value,
+        hno3_concentration: document.getElementById('hno3_concentration').value ? parseFloat(document.getElementById('hno3_concentration').value) : null,
+        h2so4_concentration: document.getElementById('h2so4_concentration').value ? parseFloat(document.getElementById('h2so4_concentration').value) : null,
+        solution_volume: parseFloat(document.getElementById('solution_volume').value),
+        temperature: parseFloat(document.getElementById('temperature').value),
+        duration: parseFloat(document.getElementById('duration').value),
+        stirring_speed: parseFloat(document.getElementById('stirring_speed').value),
+        has_oxygen: document.getElementById('has_oxygen').checked,
+        oxygen_flow: document.getElementById('oxygen_flow').value ? parseFloat(document.getElementById('oxygen_flow').value) : null,
+        cake_mass: parseFloat(document.getElementById('cake_mass').value),
+        cake_mo: parseFloat(document.getElementById('cake_mo').value),
+        cake_cu: parseFloat(document.getElementById('cake_cu').value),
+        cake_fe: parseFloat(document.getElementById('cake_fe').value),
+        cake_si: parseFloat(document.getElementById('cake_si').value),
+        solution_mo: parseFloat(document.getElementById('solution_mo').value),
+        solution_cu: parseFloat(document.getElementById('solution_cu').value),
+        solution_fe: parseFloat(document.getElementById('solution_fe').value),
+        solution_si: parseFloat(document.getElementById('solution_si').value),
+    };
+
+    try {
+        const response = await fetch('{% url "molybdenum:leaching_calculator" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            displayResults(result.results);
+            window.currentResults = result.results;
+        } else {
+            alert('Ошибка расчета: ' + (result.error || JSON.stringify(result.errors)));
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Ошибка сети при расчете');
+    }
+}
+
+function displayResults(results) {
+    document.getElementById('resultsContainer').style.display = 'block';
+    document.getElementById('noResults').style.display = 'none';
+
+    // Извлечение Mo
+    document.getElementById('mo_to_solution').textContent = results.extractions.mo_to_solution.toFixed(1) + '%';
+    document.getElementById('mo_to_cake').textContent = results.extractions.mo_to_cake.toFixed(1) + '%';
+
+    // Баланс
+    document.getElementById('cake_yield').textContent = results.cake_yield.toFixed(1) + '%';
+    document.getElementById('solid_liquid_ratio').textContent = results.solid_liquid_ratio;
+
+    // Таблица извлечений
+    document.getElementById('mo_sol_extract').textContent = results.extractions.mo_to_solution.toFixed(1) + '%';
+    document.getElementById('mo_cake_extract').textContent = results.extractions.mo_to_cake.toFixed(1) + '%';
+    document.getElementById('cu_sol_extract').textContent = results.extractions.cu_to_solution.toFixed(1) + '%';
+    document.getElementById('cu_cake_extract').textContent = results.extractions.cu_to_cake.toFixed(1) + '%';
+    document.getElementById('fe_sol_extract').textContent = results.extractions.fe_to_solution.toFixed(1) + '%';
+    document.getElementById('fe_cake_extract').textContent = results.extractions.fe_to_cake.toFixed(1) + '%';
+    document.getElementById('si_sol_extract').textContent = results.extractions.si_to_solution.toFixed(1) + '%';
+    document.getElementById('si_cake_extract').textContent = results.extractions.si_to_cake.toFixed(1) + '%';
+}
+
+async function saveTest() {
+    const data = {
+        concentrate_mass: parseFloat(document.getElementById('concentrate_mass').value),
+        initial_mo: parseFloat(document.getElementById('initial_mo').value),
+        initial_cu: parseFloat(document.getElementById('initial_cu').value),
+        initial_fe: parseFloat(document.getElementById('initial_fe').value),
+        initial_si: parseFloat(document.getElementById('initial_si').value),
+        acid_type: document.getElementById('acid_type').value,
+        hno3_concentration: document.getElementById('hno3_concentration').value ? parseFloat(document.getElementById('hno3_concentration').value) : null,
+        h2so4_concentration: document.getElementById('h2so4_concentration').value ? parseFloat(document.getElementById('h2so4_concentration').value) : null,
+        solution_volume: parseFloat(document.getElementById('solution_volume').value),
+        temperature: parseFloat(document.getElementById('temperature').value),
+        duration: parseFloat(document.getElementById('duration').value),
+        stirring_speed: parseFloat(document.getElementById('stirring_speed').value),
+        has_oxygen: document.getElementById('has_oxygen').checked,
+        oxygen_flow: document.getElementById('oxygen_flow').value ? parseFloat(document.getElementById('oxygen_flow').value) : null,
+        cake_mass: parseFloat(document.getElementById('cake_mass').value),
+        cake_mo: parseFloat(document.getElementById('cake_mo').value),
+        cake_cu: parseFloat(document.getElementById('cake_cu').value),
+        cake_fe: parseFloat(document.getElementById('cake_fe').value),
+        cake_si: parseFloat(document.getElementById('cake_si').value),
+        solution_mo: parseFloat(document.getElementById('solution_mo').value),
+        solution_cu: parseFloat(document.getElementById('solution_cu').value),
+        solution_fe: parseFloat(document.getElementById('solution_fe').value),
+        solution_si: parseFloat(document.getElementById('solution_si').value),
+        save_test: true
+    };
+
+    try {
+        const response = await fetch('{% url "molybdenum:leaching_calculator" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+
+        if (result.success && result.results.saved) {
+            document.getElementById('saveStatus').innerHTML = `
+                <div class="bg-green-500/20 border border-green-500/40 rounded-lg p-3 mt-4">
+                    <span class="text-green-400 font-semibold">✅ Тест №${result.results.test_number} успешно сохранен!</span>
+                </div>
+            `;
+            
+            // Через 3 секунды предложить перейти к списку тестов
+            setTimeout(() => {
+                if (confirm('Перейти к списку тестов выщелачивания?')) {
+                    window.location.href = '{% url "molybdenum:leaching_tests" %}';
+                }
+            }, 1500);
+        } else {
+            alert('Ошибка сохранения: ' + (result.error || 'Неизвестная ошибка'));
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Ошибка сети при сохранении');
+    }
+}
+
+// Автозаполнение из Опыта №1 (для демонстрации)
+function loadExample1() {
+    document.getElementById('concentrate_mass').value = 50;
+    document.getElementById('initial_mo').value = 20.3;
+    document.getElementById('initial_cu').value = 1.99;
+    document.getElementById('initial_fe').value = 2.33;
+    document.getElementById('initial_si').value = 2.47;
+    document.getElementById('acid_type').value = 'hno3';
+    document.getElementById('hno3_concentration').value = 50;
+    document.getElementById('solution_volume').value = 300;
+    document.getElementById('temperature').value = 95;
+    document.getElementById('duration').value = 4;
+    document.getElementById('stirring_speed').value = 300;
+    document.getElementById('has_oxygen').checked = false;
+    document.getElementById('cake_mass').value = 43.5;
+    document.getElementById('cake_mo').value = 18.86;
+    document.getElementById('cake_cu').value = 0.508;
+    document.getElementById('cake_fe').value = 0.611;
+    document.getElementById('cake_si').value = 1.74;
+    document.getElementById('solution_mo').value = 6.5;
+    document.getElementById('solution_cu').value = 2.58;
+    document.getElementById('solution_fe').value = 3.01;
+    document.getElementById('solution_si').value = 1.61;
+    
+    // Обновляем видимость полей
+    document.getElementById('hno3_block').style.display = 'block';
+    document.getElementById('h2so4_block').style.display = 'none';
+    document.getElementById('oxygen_block').style.display = 'none';
+}
+</script>
+{% endblock %}

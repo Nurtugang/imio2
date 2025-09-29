@@ -1,67 +1,93 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Metallurgy Lab{% endblock %}</title>
-    
-    {% load static %}
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
-    {% block extra_css %}{% endblock %}
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}Metallurgy Lab{% endblock %}</title>
+
+  {% load static %}
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            "primary-blue": "#2563eb",
+            "primary-purple": "#7c3aed",
+            "accent-gold": "#f59e0b",
+            "dark-bg": "#0f172a",
+          },
+        },
+      },
+    };
+  </script>
+  {% block extra_css %}{% endblock %}
 </head>
-<body>
-    <!-- Анимированные частицы -->
-    <div class="particles" id="particles"></div>
+<body class="font-sans min-h-screen flex flex-col overflow-x-hidden text-slate-50 bg-gradient-to-br from-dark-bg via-slate-800 to-slate-700">
+  <!-- Навигация -->
+  <nav class="fixed top-0 w-full py-4 bg-dark-bg/90 backdrop-blur-xl border-b border-white/20 z-50">
+    <div class="max-w-6xl mx-auto px-6 flex justify-between items-center">
+      <!-- Логотип -->
+      <a href="{% url 'core:home' %}" class="text-2xl font-bold bg-gradient-to-r from-primary-blue via-accent-gold to-primary-purple bg-clip-text text-transparent">
+        METALLURGY LAB
+      </a>
 
-    <!-- Навигация -->
-    <nav class="main-nav">
-        <div class="nav-container">
-            <div class="logo">
-                <a href="{% url 'core:home' %}">METALLURGY LAB</a>
-            </div>
-            <ul class="nav-links">
-                <li><a href="{% url 'core:home' %}" class="{% if request.resolver_match.app_name == 'core' and request.resolver_match.url_name == 'home' %}active{% endif %}">Главная</a></li>
-                <li class="dropdown">
-                    <a href="#" class="dropdown-toggle">Процессы ▼</a>
-                    <div class="dropdown-content">
-                        <a href="{% url 'flotation:dashboard' %}" class="dropdown-item {% if request.resolver_match.app_name == 'flotation' %}active{% endif %}">
-                            🧪 Флотация
-                        </a>
-                         <a href="{% url 'core:copper' %}" class="dropdown-item {% if request.resolver_match.app_name == 'flotation' %}active{% endif %}">
-                            ⚗️ Утилизация
-                        </a>
-                        <div class="dropdown-item disabled">🔥 Процесс 3</div>
-                        <div class="dropdown-item disabled">🏭 Процесс 4</div>
-                    </div>
-                </li>
-                <li><a href="{% url 'core:knowledge_base' %}" class="{% if request.resolver_match.url_name == 'knowledge_base' %}active{% endif %}">База знаний</a></li>
-                <li><a href="{% url 'analytics:general' %}" class="{% if request.resolver_match.app_name == 'analytics' %}active{% endif %}">Аналитика</a></li>
-            </ul>
-            
-            <!-- Мобильное меню -->
-            <div class="mobile-menu-btn" onclick="toggleMobileMenu()">
-                <span></span>
-                <span></span>
-                <span></span>
-            </div>
-        </div>
-    </nav>
+      <!-- Десктопное меню -->
+      <ul class="hidden md:flex gap-8">
+        <li>
+          <a href="{% url 'core:home' %}" class="relative pb-1 transition {% if request.resolver_match.app_name == 'core' and request.resolver_match.url_name == 'home' %}text-accent-gold{% else %}text-slate-50{% endif %} hover:text-accent-gold after:content-[''] after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 hover:after:w-full after:bg-accent-gold after:transition-all">
+            Главная
+          </a>
+        </li>
 
-    <!-- Основной контент -->
-    <main class="main-content">
-        {% block content %}{% endblock %}
-    </main>
+        <!-- Dropdown -->
+        <li class="relative group">
+          <a href="#" class="flex items-center gap-1 text-slate-50 hover:text-accent-gold transition">Процессы ▼</a>
+          <div class="hidden absolute top-full left-0 bg-dark-bg/95 backdrop-blur-xl border border-white/20 rounded-lg p-4 min-w-[200px] shadow-xl group-hover:block">
+            <a href="{% url 'flotation:dashboard' %}" class="block py-2 text-slate-50 hover:text-accent-gold {% if request.resolver_match.app_name == 'flotation' %}text-accent-gold{% endif %}">
+              🧪 Флотация
+            </a>
+            <a href="{% url 'core:copper' %}" class="block py-2 text-slate-50 hover:text-accent-gold {% if request.resolver_match.app_name == 'flotation' %}text-accent-gold{% endif %}">
+              ⚗️ Утилизация
+            </a>
+            <a href="{% url 'molybdenum:dashboard' %}" class="block py-2 text-slate-50 hover:text-accent-gold {% if request.resolver_match.app_name == 'molybden' %}text-accent-gold{% endif %}">
+              🔥 Молибден
+            </a>
+            <div class="block py-2 text-slate-500 cursor-not-allowed">🏭 Процесс 4</div>
+          </div>
+        </li>
 
-    <!-- Футер -->
-    <footer class="main-footer">
-        <div class="footer-content">
-            <p>&copy; 2025 Metallurgy Lab. Цифровая платформа для металлургических процессов.</p>
-        </div>
-    </footer>
+        <li>
+          <a href="{% url 'core:knowledge_base' %}" class="relative pb-1 transition {% if request.resolver_match.url_name == 'knowledge_base' %}text-accent-gold{% else %}text-slate-50{% endif %} hover:text-accent-gold after:content-[''] after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 hover:after:w-full after:bg-accent-gold after:transition-all">
+            База знаний
+          </a>
+        </li>
+        <li>
+        </li>
+      </ul>
 
-    <!-- Скрипты -->
-    <script src="{% static 'js/script.js' %}"></script>
-    {% block extra_js %}{% endblock %}
+      <!-- Мобильное меню -->
+      <button onclick="toggleMobileMenu()" class="md:hidden flex flex-col gap-1">
+        <span class="w-6 h-0.5 bg-slate-50"></span>
+        <span class="w-6 h-0.5 bg-slate-50"></span>
+        <span class="w-6 h-0.5 bg-slate-50"></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Основной контент -->
+  <main class="flex-grow mt-20">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Футер -->
+  <footer class="py-8 text-center bg-dark-bg/80 border-t border-white/20 text-slate-400">
+    <p>&copy; 2025 Metallurgy Lab. Цифровая платформа для металлургических процессов.</p>
+  </footer>
+
+  <!-- Скрипты -->
+  <script src="{% static 'js/script.js' %}"></script>
+  {% block extra_js %}{% endblock %}
 </body>
 </html>
-

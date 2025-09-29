@@ -1,0 +1,201 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Калькулятор сорбции - Metallurgy Lab{% endblock %}
+
+{% block content %}
+<div class="pt-24 pb-16 px-4 max-w-6xl mx-auto">
+    <div class="text-center mb-8">
+        <h1 class="text-4xl font-bold mb-2 bg-gradient-to-r from-green-500 to-blue-600 bg-clip-text text-transparent">
+            Калькулятор сорбции Mo
+        </h1>
+        <p class="text-slate-300">Расчет извлечения молибдена на анионитах</p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Форма -->
+        <div class="space-y-4">
+            <div class="bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl p-6">
+                <h2 class="text-xl font-bold text-slate-100 mb-4">Параметры сорбции</h2>
+                
+                <div class="space-y-3">
+                    <div>
+                        <label class="block text-sm text-slate-300 mb-1">Объем раствора (мл)</label>
+                        <input type="number" id="solution_volume" value="200" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-slate-100">
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-sm text-slate-300 mb-1">C₀ Mo (г/л)</label>
+                            <input type="number" id="initial_mo" step="0.001" value="2.429" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-slate-100">
+                        </div>
+                        <div>
+                            <label class="block text-sm text-slate-300 mb-1">C Mo (г/л)</label>
+                            <input type="number" id="final_mo" step="0.001" value="1.226" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-slate-100">
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm text-slate-300 mb-1">H₂SO₄ (г/л)</label>
+                        <input type="number" id="h2so4" value="200" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-slate-100">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm text-slate-300 mb-1">Анионит</label>
+                        <select id="anionite_type" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-slate-100">
+                            {% for code, name in anionite_types %}
+                            <option value="{{ code }}">{{ name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm text-slate-300 mb-1">Масса анионита (г)</label>
+                        <input type="number" id="anionite_mass" value="10" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-slate-100">
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-sm text-slate-300 mb-1">Температура (°C)</label>
+                            <input type="number" id="temperature" value="20" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-slate-100">
+                        </div>
+                        <div>
+                            <label class="block text-sm text-slate-300 mb-1">Время (мин)</label>
+                            <input type="number" id="duration" value="60" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-slate-100">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="calculateSorption()" class="w-full bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white font-bold py-3 rounded-xl transition-all">
+                Рассчитать сорбцию
+            </button>
+        </div>
+
+        <!-- Результаты -->
+        <div>
+            <div id="noResults" class="bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl p-12 text-center">
+                <div class="text-6xl mb-4">⚗️</div>
+                <h3 class="text-2xl font-bold text-slate-200 mb-2">Введите данные</h3>
+                <p class="text-slate-400">Заполните параметры и нажмите "Рассчитать"</p>
+            </div>
+
+            <div id="resultsContainer" style="display: none;" class="space-y-4">
+                <div class="bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl p-6">
+                    <h2 class="text-xl font-bold text-slate-100 mb-4">Результаты</h2>
+                    
+                    <div class="bg-green-500/20 border border-green-500/40 rounded-xl p-4 text-center mb-4">
+                        <div class="text-sm text-green-300 mb-1">Извлечение Mo</div>
+                        <div class="text-5xl font-bold text-green-400" id="extraction">--</div>
+                    </div>
+                    
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between p-2 bg-slate-900/50 rounded">
+                            <span class="text-slate-300">Mo на анионите (г):</span>
+                            <span class="text-amber-400 font-semibold" id="mo_on_anionite">--</span>
+                        </div>
+                        <div class="flex justify-between p-2 bg-slate-900/50 rounded">
+                            <span class="text-slate-300">Сорбционная емкость:</span>
+                            <span class="text-amber-400 font-semibold" id="capacity">--</span>
+                        </div>
+                        <div class="flex justify-between p-2 bg-slate-900/50 rounded">
+                            <span class="text-slate-300">Удалено из раствора:</span>
+                            <span class="text-amber-400 font-semibold" id="removed">--</span>
+                        </div>
+                    </div>
+                </div>
+
+                <button onclick="saveTest()" class="w-full bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white font-bold py-3 rounded-xl transition-all">
+                    Сохранить тест
+                </button>
+                <div id="saveStatus" class="text-center text-sm"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% csrf_token %}
+
+<script>
+async function calculateSorption() {
+    const data = {
+        solution_volume: parseFloat(document.getElementById('solution_volume').value),
+        initial_mo_concentration: parseFloat(document.getElementById('initial_mo').value),
+        final_mo_concentration: parseFloat(document.getElementById('final_mo').value),
+        h2so4_concentration: parseFloat(document.getElementById('h2so4').value),
+        anionite_type: document.getElementById('anionite_type').value,
+        anionite_mass: parseFloat(document.getElementById('anionite_mass').value),
+        temperature: parseFloat(document.getElementById('temperature').value),
+        duration: parseFloat(document.getElementById('duration').value),
+    };
+
+    try {
+        const response = await fetch('{% url "molybdenum:sorption_calculator" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+        if (result.success) {
+            displayResults(result.results);
+            window.currentResults = result.results;
+        } else {
+            alert('Ошибка: ' + (result.error || JSON.stringify(result.errors)));
+        }
+    } catch (error) {
+        alert('Ошибка сети');
+    }
+}
+
+function displayResults(r) {
+    document.getElementById('resultsContainer').style.display = 'block';
+    document.getElementById('noResults').style.display = 'none';
+    
+    document.getElementById('extraction').textContent = r.extraction.toFixed(1) + '%';
+    document.getElementById('mo_on_anionite').textContent = r.mo_on_anionite.toFixed(4) + ' г';
+    document.getElementById('capacity').textContent = r.sorption_capacity.toExponential(2) + ' г-атом/г';
+    document.getElementById('removed').textContent = r.mo_removed.toFixed(3) + ' г/л';
+}
+
+async function saveTest() {
+    const data = {
+        solution_volume: parseFloat(document.getElementById('solution_volume').value),
+        initial_mo_concentration: parseFloat(document.getElementById('initial_mo').value),
+        final_mo_concentration: parseFloat(document.getElementById('final_mo').value),
+        h2so4_concentration: parseFloat(document.getElementById('h2so4').value),
+        anionite_type: document.getElementById('anionite_type').value,
+        anionite_mass: parseFloat(document.getElementById('anionite_mass').value),
+        temperature: parseFloat(document.getElementById('temperature').value),
+        duration: parseFloat(document.getElementById('duration').value),
+        save_test: true
+    };
+
+    try {
+        const response = await fetch('{% url "molybdenum:sorption_calculator" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+        if (result.success && result.results.saved) {
+            document.getElementById('saveStatus').innerHTML = `<div class="text-green-400">✅ Тест №${result.results.test_number} сохранен!</div>`;
+            setTimeout(() => {
+                if (confirm('Перейти к списку тестов?')) {
+                    window.location.href = '{% url "molybdenum:sorption_tests" %}';
+                }
+            }, 1000);
+        }
+    } catch (error) {
+        alert('Ошибка сохранения');
+    }
+}
+</script>
+{% endblock %}

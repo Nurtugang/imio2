@@ -3,882 +3,121 @@
 
 {% block title %}Мои реагенты - Флотация{% endblock %}
 
-{% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/flotation.css' %}">
-<style>
-/* ИСПРАВЛЕННЫЕ СТИЛИ - В ЕДИНОМ СТИЛЕ САЙТА */
-
-/* Убираем отдельный заголовок, используем стандартную структуру */
-.reagents-header {
-    background: none;
-    margin-top: 80px;
-    padding: 4rem 2rem;
-    text-align: center;
-    position: relative;
-}
-
-.reagents-header::before {
-    display: none;
-}
-
-.reagents-header h1 {
-    font-size: 3rem;
-    font-weight: 800;
-    background: linear-gradient(45deg, var(--primary-blue), var(--primary-purple), var(--accent-gold));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    animation: glow 2s ease-in-out infinite alternate;
-    margin-bottom: 1rem;
-}
-
-.reagents-header p {
-    font-size: 1.25rem;
-    color: #cbd5e1;
-    line-height: 1.6;
-    margin-bottom: 2rem;
-}
-
-/* Статистика в стиле главной страницы */
-.header-stats {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 2rem;
-    justify-content: center;
-    max-width: 800px;
-    margin: 0 auto;
-}
-
-.header-stat {
-    background: var(--glass-bg);
-    backdrop-filter: blur(20px);
-    border: 1px solid var(--glass-border);
-    border-radius: 16px;
-    padding: 1.5rem;
-    text-align: center;
-    transition: all 0.3s ease;
-}
-
-.header-stat:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
-}
-
-.header-stat .stat-number {
-    display: block;
-    font-size: 2rem;
-    font-weight: 800;
-    color: var(--accent-gold);
-    margin-bottom: 0.5rem;
-}
-
-.header-stat .stat-label {
-    color: #cbd5e1;
-    font-size: 0.9rem;
-}
-
-/* Контролы в стиле сайта */
-.reagents-controls {
-    padding: 2rem;
-    max-width: 1200px;
-    margin: 0 auto;
-}
-
-.info-panel {
-    display: flex;
-    gap: 2rem;
-    justify-content: center;
-    padding: 1rem;
-    background: var(--glass-bg);
-    backdrop-filter: blur(20px);
-    border: 1px solid var(--glass-border);
-    border-radius: 12px;
-    margin-bottom: 2rem;
-}
-
-.info-item {
-    display: flex;
-    gap: 0.5rem;
-    align-items: center;
-}
-
-.info-label {
-    color: #cbd5e1;
-    font-size: 0.9rem;
-}
-
-.info-value {
-    color: var(--accent-gold);
-    font-weight: 600;
-}
-
-/* Остальные стили остаются как есть, но убираем конфликтующие цвета */
-.reagents-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 2rem;
-    padding: 0 2rem 4rem;
-    max-width: 1200px;
-    margin: 0 auto;
-}
-
-/* Карточки реагентов уже в правильном стиле */
-.reagent-card {
-    background: var(--glass-bg);
-    backdrop-filter: blur(20px);
-    border: 1px solid var(--glass-border);
-    border-radius: 20px;
-    padding: 1.5rem;
-    transition: all 0.3s ease;
-    cursor: pointer;
-    position: relative;
-    overflow: hidden;
-}
-
-.reagent-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: var(--gradient-primary);
-    transform: scaleX(0);
-    transition: transform 0.3s ease;
-}
-
-.reagent-card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-    border-color: var(--accent-gold);
-}
-
-.reagent-card:hover::before {
-    transform: scaleX(1);
-}
-
-/* Убираем лишние переопределения стилей */
-</style>
-{% endblock %}
-
 {% block content %}
 <!-- Заголовок страницы -->
-<section class="reagents-header">
-    <div class="reagents-header-content">
-        <h1>🧪 Мои реагенты</h1>
-        <p>Управляйте библиотекой реагентов, анализируйте эффективность и создавайте оптимальные смеси для флотационных процессов</p>
-        
-        <!-- Быстрая статистика -->
-        <div class="header-stats">
-            <div class="header-stat">
-                <span class="stat-number">{{ reagent_stats.total }}</span>
-                <span class="stat-label">Всего реагентов</span>
-            </div>
-            <div class="header-stat">
-                <span class="stat-number">{{ reagent_stats.experimental }}</span>
-                <span class="stat-label">MP серия</span>
-            </div>
-            <div class="header-stat">
-                <span class="stat-number">{{ top_reagents.0.max_extraction|floatformat:1 }}%</span>
-                <span class="stat-label">Лучший результат</span>
-            </div>
-        </div>
-    </div>
-</section>
+<section class="mt-20 px-6 py-12 text-center">
+  <h1 class="text-4xl md:text-5xl font-extrabold mb-4 bg-gradient-to-r from-primary-blue via-primary-purple to-accent-gold bg-clip-text text-transparent animate-pulse">
+    🧪 Мои реагенты
+  </h1>
+  <p class="text-lg text-slate-300 max-w-3xl mx-auto mb-10 leading-relaxed">
+    Управляйте библиотекой реагентов, анализируйте эффективность и создавайте оптимальные смеси для флотационных процессов
+  </p>
 
-<!-- Контролы: поиск, фильтры, вид -->
-<section class="reagents-controls">
-    <div class="controls-grid">
-        <!-- Поиск -->
-        <div class="search-box">
-            <span class="search-icon">🔍</span>
-            <input type="text" class="search-input" placeholder="Поиск реагентов..." id="reagentSearch">
-        </div>
-        
-        <!-- Фильтры -->
-        <div class="filter-tabs">
-            {% for filter_type in reagent_types %}
-            <button class="filter-tab {% if forloop.first %}active{% endif %}" data-filter="{{ filter_type.value }}">
-                {{ filter_type.label }}
-            </button>
-            {% endfor %}
-        </div>
-        
-        <!-- Переключатель вида -->
-        <div class="view-toggle">
-            <button class="view-btn active" data-view="grid" title="Сетка">⊞</button>
-            <button class="view-btn" data-view="list" title="Список">☰</button>
-        </div>
+  <!-- Быстрая статистика -->
+  <div class="grid gap-6 sm:grid-cols-3 max-w-4xl mx-auto">
+    <div class="bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl p-6 text-center hover:-translate-y-1 hover:shadow-xl transition">
+      <span class="block text-2xl font-extrabold text-accent-gold mb-1">{{ reagent_stats.total }}</span>
+      <span class="text-slate-300 text-sm">Всего реагентов</span>
     </div>
-    
-    <!-- Информационная панель -->
-    <div class="info-panel">
-        <div class="info-item">
-            <span class="info-label">Найдено реагентов:</span>
-            <span class="info-value" id="reagentsCount">{{ reagents.count }}</span>
-        </div>
-        <div class="info-item">
-            <span class="info-label">Средняя эффективность:</span>
-            <span class="info-value">
-            {% if reagents %}
-                {% for reagent in reagents %}
-                    {% if reagent.average_extraction %}
-                        {{ reagent.average_extraction|floatformat:1 }}%
-                    {% endif %}
-                {% endfor %}
-            {% else %}
-                N/A
-            {% endif %}
-            </span>
-        </div>
+    <div class="bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl p-6 text-center hover:-translate-y-1 hover:shadow-xl transition">
+      <span class="block text-2xl font-extrabold text-accent-gold mb-1">{{ reagent_stats.experimental }}</span>
+      <span class="text-slate-300 text-sm">MP серия</span>
     </div>
+    <div class="bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl p-6 text-center hover:-translate-y-1 hover:shadow-xl transition">
+      <span class="block text-2xl font-extrabold text-accent-gold mb-1">{{ top_reagents.0.max_extraction|floatformat:1 }}%</span>
+      <span class="text-slate-300 text-sm">Лучший результат</span>
+    </div>
+  </div>
 </section>
 
 <!-- Сетка реагентов -->
-<section class="reagents-grid" id="reagentsGrid">
-    {% for reagent in reagents %}
-    <div class="reagent-card {{ reagent.type }}" data-category="{{ reagent.type }}" data-name="{{ reagent.name|lower }}" data-tags="{% for tag in reagent.tags %}{{ tag.0|lower }} {% endfor %}">
-        <div class="reagent-header">
-            <div class="reagent-icon">{{ reagent.icon }}</div>
-            <div class="reagent-info">
-                <h3>{{ reagent.name }}</h3>
-                <div class="reagent-type">{{ reagent.get_type_display }}</div>
-            </div>
-        </div>
-        
-        <p class="reagent-description">{{ reagent.description }}</p>
-        
-        <div class="reagent-properties">
-            <div class="property">
-                <span class="property-value">{{ reagent.dosage_range.main }}</span>
-                <span class="property-label">г/т {% if reagent.dosage_range.cleaner %}(основная){% endif %}</span>
-            </div>
-            {% if reagent.dosage_range.cleaner %}
-            <div class="property">
-                <span class="property-value">{{ reagent.dosage_range.cleaner }}</span>
-                <span class="property-label">г/т (перечистка)</span>
-            </div>
-            {% elif reagent.max_extraction %}
-            <div class="property">
-                <span class="property-value">{{ reagent.max_extraction|floatformat:1 }}%</span>
-                <span class="property-label">Макс. извлечение</span>
-            </div>
-            {% elif reagent.working_ph_min and reagent.working_ph_max %}
-            <div class="property">
-                <span class="property-value">pH {{ reagent.working_ph_min|floatformat:0 }}-{{ reagent.working_ph_max|floatformat:0 }}</span>
-                <span class="property-label">Рабочий pH</span>
-            </div>
-            {% endif %}
-        </div>
-        
-        <div class="reagent-tags">
-            {% for tag, css_class in reagent.tags %}
-            <span class="tag {{ css_class }}">{{ tag }}</span>
-            {% endfor %}
-        </div>
-        
-        <div class="reagent-actions">
-            <button class="action-btn" onclick="showReagentStats({{ reagent.id }}, '{{ reagent.name }}')">
-                📊 Статистика
-            </button>
-            <button class="action-btn primary" onclick="addToMixture('{{ reagent.name }}', '{{ reagent.get_type_display }}', {{ reagent.id }})">
-                ➕ В смесь
-            </button>
-        </div>
+<section id="reagentsGrid" class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 max-w-6xl mx-auto px-6 pb-16">
+  {% for reagent in reagents %}
+  <div class="bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl p-6 transition hover:-translate-y-1 hover:shadow-xl hover:border-accent-gold cursor-pointer reagent-card {{ reagent.type }}"
+    data-category="{{ reagent.type }}" data-name="{{ reagent.name|lower }}"
+    data-tags="{% for tag in reagent.tags %}{{ tag.0|lower }} {% endfor %}">
+    <div class="flex items-center gap-4 mb-4">
+      <div class="text-3xl">{{ reagent.icon }}</div>
+      <div>
+        <h3 class="text-lg font-semibold text-slate-100">{{ reagent.name }}</h3>
+        <div class="text-slate-400 text-sm">{{ reagent.get_type_display }}</div>
+      </div>
     </div>
-    {% empty %}
-    <div class="empty-state">
-        <div class="empty-state-icon">🧪</div>
-        <h3>Реагенты не найдены</h3>
-        <p>В базе данных пока нет реагентов. Добавьте их через панель администратора.</p>
+
+    <p class="text-slate-300 text-sm mb-4">{{ reagent.description }}</p>
+
+    <div class="flex flex-wrap gap-4 mb-4">
+      {% if reagent.dosage_range.main %}
+      <div>
+        <div class="text-accent-gold font-semibold">{{ reagent.dosage_range.main }}</div>
+        <div class="text-slate-400 text-xs">г/т {% if reagent.dosage_range.cleaner %}(основная){% endif %}</div>
+      </div>
+      {% endif %}
+      {% if reagent.dosage_range.cleaner %}
+      <div>
+        <div class="text-accent-gold font-semibold">{{ reagent.dosage_range.cleaner }}</div>
+        <div class="text-slate-400 text-xs">г/т (перечистка)</div>
+      </div>
+      {% elif reagent.max_extraction %}
+      <div>
+        <div class="text-accent-gold font-semibold">{{ reagent.max_extraction|floatformat:1 }}%</div>
+        <div class="text-slate-400 text-xs">Макс. извлечение</div>
+      </div>
+      {% elif reagent.working_ph_min and reagent.working_ph_max %}
+      <div>
+        <div class="text-accent-gold font-semibold">pH {{ reagent.working_ph_min|floatformat:0 }}–{{ reagent.working_ph_max|floatformat:0 }}</div>
+        <div class="text-slate-400 text-xs">Рабочий pH</div>
+      </div>
+      {% endif %}
     </div>
-    {% endfor %}
+
+    <div class="flex flex-wrap gap-2 mb-4">
+      {% for tag, css_class in reagent.tags %}
+      <span class="px-3 py-1 rounded-full bg-white/10 border border-white/20 text-xs text-slate-200">{{ tag }}</span>
+      {% endfor %}
+    </div>
+
+    <div class="flex gap-2">
+      <button onclick="showReagentStats({{ reagent.id }}, '{{ reagent.name }}')" class="flex-1 px-4 py-2 rounded-lg bg-white/10 text-slate-200 hover:border-accent-gold border border-white/20 transition">📊 Статистика</button>
+      <button onclick="addToMixture('{{ reagent.name }}', '{{ reagent.get_type_display }}', {{ reagent.id }})" class="flex-1 px-4 py-2 rounded-lg bg-gradient-to-r from-primary-blue to-primary-purple text-white font-medium hover:shadow-xl transition">➕ В смесь</button>
+    </div>
+  </div>
+  {% empty %}
+  <div class="text-center p-12 col-span-full text-slate-400">
+    <div class="text-4xl mb-4">🧪</div>
+    <h3 class="text-lg text-slate-200 mb-2">Реагенты не найдены</h3>
+    <p>Добавьте их через панель администратора.</p>
+  </div>
+  {% endfor %}
 </section>
 
-<!-- Плавающая панель создания смеси -->
-<div class="mixture-panel" id="mixturePanel" style="display: none;">
-    <div class="mixture-content">
-        <h3>🧪 Создание смеси</h3>
-        <div class="mixture-reagents" id="mixtureReagents">
-            <!-- Реагенты в смеси будут добавляться сюда -->
-        </div>
-        <div class="mixture-stats" id="mixtureStats" style="display: none;">
-            <div class="mixture-stat">
-                <span>Прогнозируемое извлечение:</span>
-                <span id="predictedExtraction">--%</span>
-            </div>
-        </div>
-        <div class="mixture-actions">
-            <button class="btn btn-primary" onclick="calculateMixture()">
-                Рассчитать эффективность
-            </button>
-            <button class="btn" onclick="clearMixture()">Очистить</button>
-        </div>
+<!-- Панель смеси -->
+<div id="mixturePanel" class="fixed bottom-4 right-4 bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl p-6 w-80 hidden">
+  <h3 class="text-lg font-semibold mb-4">🧪 Создание смеси</h3>
+  <div id="mixtureReagents" class="flex flex-col gap-2 mb-4"></div>
+  <div id="mixtureStats" class="hidden p-3 bg-white/5 rounded-lg mb-4">
+    <div class="flex justify-between text-slate-200 text-sm">
+      <span>Прогнозируемое извлечение:</span>
+      <span id="predictedExtraction" class="text-accent-gold font-semibold">--%</span>
     </div>
+  </div>
+  <div class="flex gap-2">
+    <button onclick="calculateMixture()" class="flex-1 px-4 py-2 rounded-lg bg-gradient-to-r from-primary-blue to-primary-purple text-white font-medium">Рассчитать</button>
+    <button onclick="clearMixture()" class="flex-1 px-4 py-2 rounded-lg bg-white/10 border border-white/20 text-slate-200">Очистить</button>
+  </div>
 </div>
 
-<!-- Модальное окно статистики реагента -->
-<div class="modal-overlay" id="reagentModal" style="display: none;" onclick="closeReagentModal()">
-    <div class="modal-content" onclick="event.stopPropagation()">
-        <div class="modal-header">
-            <h3 id="modalReagentName">Статистика реагента</h3>
-            <button class="modal-close" onclick="closeReagentModal()">×</button>
-        </div>
-        <div class="modal-body" id="modalReagentContent">
-            <!-- Контент будет загружаться динамически -->
-        </div>
+<!-- Модальное окно -->
+<div id="reagentModal" class="fixed inset-0 bg-black/80 hidden items-center justify-center z-50" onclick="closeReagentModal()">
+  <div class="bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl max-w-lg w-full p-6 relative" onclick="event.stopPropagation()">
+    <div class="flex justify-between items-center mb-4">
+      <h3 id="modalReagentName" class="text-lg font-semibold text-slate-100">Статистика реагента</h3>
+      <button onclick="closeReagentModal()" class="text-slate-300 hover:text-white text-xl">×</button>
     </div>
+    <div id="modalReagentContent" class="text-slate-300 text-sm">
+      <!-- Динамический контент -->
+    </div>
+  </div>
 </div>
 {% endblock %}
 
-{% block extra_js %}
-<script>
-// Переменные для работы со смесью
-let currentMixture = [];
-let reagentsData = {{ reagents|safe }}; // Данные реагентов из Django
-
-// Инициализация страницы
-document.addEventListener('DOMContentLoaded', function() {
-    initializeReagentsPage();
-});
-
-function initializeReagentsPage() {
-    setupFilters();
-    setupSearch();
-    setupViewToggle();
-    updateReagentsCount();
-}
-
-// Настройка фильтров
-function setupFilters() {
-    const filterTabs = document.querySelectorAll('.filter-tab');
-    const reagentCards = document.querySelectorAll('.reagent-card');
-    
-    filterTabs.forEach(tab => {
-        tab.addEventListener('click', () => {
-            // Убираем активный класс со всех табов
-            filterTabs.forEach(t => t.classList.remove('active'));
-            tab.classList.add('active');
-            
-            const filter = tab.dataset.filter;
-            let visibleCount = 0;
-            
-            // Фильтруем карточки
-            reagentCards.forEach(card => {
-                if (filter === 'all' || card.dataset.category === filter) {
-                    card.style.display = 'block';
-                    card.style.animation = 'fadeInUp 0.3s ease';
-                    visibleCount++;
-                } else {
-                    card.style.display = 'none';
-                }
-            });
-            
-            updateReagentsCount(visibleCount);
-            
-            if (visibleCount === 0) {
-                showEmptyState(`Нет реагентов в категории "${tab.textContent}"`);
-            } else {
-                hideEmptyState();
-            }
-        });
-    });
-}
-
-// Настройка поиска
-function setupSearch() {
-    const searchInput = document.getElementById('reagentSearch');
-    const reagentCards = document.querySelectorAll('.reagent-card');
-    
-    searchInput.addEventListener('input', MetallurgyLab.debounce((e) => {
-        const searchTerm = e.target.value.toLowerCase();
-        let visibleCount = 0;
-        
-        reagentCards.forEach(card => {
-            const name = card.dataset.name || '';
-            const tags = card.dataset.tags || '';
-            const description = card.querySelector('.reagent-description').textContent.toLowerCase();
-            
-            const matches = name.includes(searchTerm) || 
-                          description.includes(searchTerm) || 
-                          tags.includes(searchTerm);
-            
-            if (matches || searchTerm === '') {
-                // Проверяем также активный фильтр
-                const activeFilter = document.querySelector('.filter-tab.active').dataset.filter;
-                if (activeFilter === 'all' || card.dataset.category === activeFilter) {
-                    card.style.display = 'block';
-                    card.style.animation = 'fadeInUp 0.3s ease';
-                    visibleCount++;
-                } else {
-                    card.style.display = 'none';
-                }
-            } else {
-                card.style.display = 'none';
-            }
-        });
-        
-        updateReagentsCount(visibleCount);
-        
-        if (visibleCount === 0 && searchTerm !== '') {
-            showEmptyState(`Не найдено реагентов по запросу "${searchTerm}"`);
-        } else {
-            hideEmptyState();
-        }
-    }, 300));
-}
-
-// Настройка переключателя вида
-function setupViewToggle() {
-    const viewBtns = document.querySelectorAll('.view-btn');
-    const reagentsGrid = document.getElementById('reagentsGrid');
-    
-    viewBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            viewBtns.forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            
-            const view = btn.dataset.view;
-            
-            if (view === 'list') {
-                reagentsGrid.style.gridTemplateColumns = '1fr';
-                reagentsGrid.style.maxWidth = '800px';
-                
-                // Меняем макет карточек для списочного вида
-                document.querySelectorAll('.reagent-card').forEach(card => {
-                    card.classList.add('list-view');
-                });
-            } else {
-                reagentsGrid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(320px, 1fr))';
-                reagentsGrid.style.maxWidth = '1200px';
-                
-                // Возвращаем обычный макет
-                document.querySelectorAll('.reagent-card').forEach(card => {
-                    card.classList.remove('list-view');
-                });
-            }
-        });
-    });
-}
-
-// Добавление реагента в смесь
-function addToMixture(name, type, id) {
-    // Проверяем, не добавлен ли уже этот реагент
-    if (currentMixture.find(r => r.id === id)) {
-        MetallurgyLab.showNotification(`${name} уже в смеси`, 'warning');
-        return;
-    }
-    
-    const reagent = { id, name, type };
-    currentMixture.push(reagent);
-    
-    MetallurgyLab.showNotification(`${name} добавлен в смесь`, 'success');
-    
-    // Показываем панель смеси
-    const mixturePanel = document.getElementById('mixturePanel');
-    mixturePanel.style.display = 'block';
-    
-    // Обновляем отображение смеси
-    updateMixtureDisplay();
-}
-
-// Обновление отображения смеси
-function updateMixtureDisplay() {
-    const mixtureReagents = document.getElementById('mixtureReagents');
-    mixtureReagents.innerHTML = '';
-    
-    currentMixture.forEach(reagent => {
-        const reagentTag = document.createElement('div');
-        reagentTag.className = 'mixture-reagent';
-        reagentTag.innerHTML = `
-            <span>${reagent.name}</span>
-            <small>${reagent.type}</small>
-            <button onclick="removeFromMixture(${reagent.id})">×</button>
-        `;
-        mixtureReagents.appendChild(reagentTag);
-    });
-}
-
-// Удаление реагента из смеси
-function removeFromMixture(reagentId) {
-    currentMixture = currentMixture.filter(r => r.id !== reagentId);
-    updateMixtureDisplay();
-    
-    if (currentMixture.length === 0) {
-        document.getElementById('mixturePanel').style.display = 'none';
-        document.getElementById('mixtureStats').style.display = 'none';
-    }
-}
-
-// Очистка смеси
-function clearMixture() {
-    currentMixture = [];
-    document.getElementById('mixtureReagents').innerHTML = '';
-    document.getElementById('mixturePanel').style.display = 'none';
-    document.getElementById('mixtureStats').style.display = 'none';
-    MetallurgyLab.showNotification('Смесь очищена', 'info');
-}
-
-// Расчет эффективности смеси
-function calculateMixture() {
-    if (currentMixture.length === 0) {
-        MetallurgyLab.showNotification('Добавьте реагенты в смесь', 'warning');
-        return;
-    }
-    
-    // Простая имитация расчета эффективности
-    // В реальности здесь будет AJAX запрос к Django
-    const avgEfficiency = 85 + Math.random() * 10; // Имитация
-    
-    document.getElementById('predictedExtraction').textContent = avgEfficiency.toFixed(1) + '%';
-    document.getElementById('mixtureStats').style.display = 'block';
-    
-    MetallurgyLab.showNotification('Эффективность рассчитана', 'success');
-}
-
-// Показ статистики реагента
-function showReagentStats(reagentId, reagentName) {
-    const modal = document.getElementById('reagentModal');
-    const modalName = document.getElementById('modalReagentName');
-    const modalContent = document.getElementById('modalReagentContent');
-    
-    modalName.textContent = `Статистика: ${reagentName}`;
-    modalContent.innerHTML = `
-        <div class="loading-placeholder">
-            <div class="loading-spinner">⟳</div>
-            <p>Загрузка статистики...</p>
-        </div>
-    `;
-    
-    modal.style.display = 'flex';
-    
-    // Имитация загрузки данных
-    setTimeout(() => {
-        modalContent.innerHTML = `
-            <div class="stats-grid">
-                <div class="stat-item">
-                    <h4>Использований в тестах</h4>
-                    <p class="stat-value">${Math.floor(Math.random() * 50 + 10)}</p>
-                </div>
-                <div class="stat-item">
-                    <h4>Среднее извлечение</h4>
-                    <p class="stat-value">${(85 + Math.random() * 10).toFixed(1)}%</p>
-                </div>
-                <div class="stat-item">
-                    <h4>Лучший результат</h4>
-                    <p class="stat-value">${(90 + Math.random() * 7).toFixed(1)}%</p>
-                </div>
-                <div class="stat-item">
-                    <h4>Эффективность</h4>
-                    <p class="stat-value">${(80 + Math.random() * 15).toFixed(1)}%</p>
-                </div>
-            </div>
-            <div class="chart-placeholder">
-                <p>📊 График эффективности по времени</p>
-                <small>(Функция в разработке)</small>
-            </div>
-        `;
-    }, 1000);
-}
-
-// Закрытие модального окна
-function closeReagentModal() {
-    document.getElementById('reagentModal').style.display = 'none';
-}
-
-// Обновление счетчика реагентов
-function updateReagentsCount(count) {
-    const counter = document.getElementById('reagentsCount');
-    if (counter) {
-        counter.textContent = count !== undefined ? count : document.querySelectorAll('.reagent-card:not([style*="display: none"])').length;
-    }
-}
-
-// Показ пустого состояния
-function showEmptyState(message = 'Реагенты не найдены') {
-    let emptyState = document.querySelector('.empty-state-dynamic');
-    if (!emptyState) {
-        emptyState = document.createElement('div');
-        emptyState.className = 'empty-state empty-state-dynamic';
-        emptyState.innerHTML = `
-            <div class="empty-state-icon">🔍</div>
-            <h3>Реагенты не найдены</h3>
-            <p>Попробуйте изменить параметры поиска или фильтры</p>
-        `;
-        document.getElementById('reagentsGrid').appendChild(emptyState);
-    }
-    emptyState.querySelector('h3').textContent = message;
-    emptyState.style.display = 'block';
-}
-
-// Скрытие пустого состояния
-function hideEmptyState() {
-    const emptyState = document.querySelector('.empty-state-dynamic');
-    if (emptyState) {
-        emptyState.style.display = 'none';
-    }
-}
-
-// Закрытие модального окна по Escape
-document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') {
-        closeReagentModal();
-    }
-});
-</script>
-
-<!-- Дополнительные стили для Django версии -->
-<style>
-/* Стили заголовка */
-.header-stats {
-    display: flex;
-    gap: 2rem;
-    justify-content: center;
-    margin-top: 2rem;
-}
-
-.header-stat {
-    text-align: center;
-}
-
-.header-stat .stat-number {
-    display: block;
-    font-size: 2rem;
-    font-weight: 700;
-    color: var(--accent-gold);
-}
-
-.header-stat .stat-label {
-    font-size: 0.9rem;
-    opacity: 0.9;
-}
-
-/* Информационная панель */
-.info-panel {
-    display: flex;
-    gap: 2rem;
-    padding: 1rem;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 12px;
-    margin-bottom: 1rem;
-}
-
-.info-item {
-    display: flex;
-    gap: 0.5rem;
-    align-items: center;
-}
-
-.info-label {
-    color: #94a3b8;
-    font-size: 0.9rem;
-}
-
-.info-value {
-    color: var(--accent-gold);
-    font-weight: 600;
-}
-
-/* Списочный вид */
-.reagent-card.list-view {
-    display: flex !important;
-    align-items: center;
-    gap: 2rem;
-    padding: 1rem 2rem;
-}
-
-.reagent-card.list-view .reagent-header {
-    margin-bottom: 0;
-    min-width: 200px;
-}
-
-.reagent-card.list-view .reagent-description {
-    flex: 1;
-    margin-bottom: 0;
-}
-
-.reagent-card.list-view .reagent-properties {
-    display: flex;
-    gap: 1rem;
-    margin-bottom: 0;
-}
-
-.reagent-card.list-view .reagent-actions {
-    min-width: 180px;
-}
-
-/* Модальное окно */
-.modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.8);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 10000;
-    animation: fadeIn 0.3s ease;
-}
-
-.modal-content {
-    background: var(--glass-bg);
-    backdrop-filter: blur(20px);
-    border: 1px solid var(--glass-border);
-    border-radius: 20px;
-    max-width: 600px;
-    width: 90%;
-    max-height: 80vh;
-    overflow-y: auto;
-    animation: slideInUp 0.3s ease;
-}
-
-.modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1.5rem;
-    border-bottom: 1px solid var(--glass-border);
-}
-
-.modal-header h3 {
-    color: var(--text-light);
-    margin: 0;
-}
-
-.modal-close {
-    background: none;
-    border: none;
-    color: var(--text-light);
-    font-size: 1.5rem;
-    cursor: pointer;
-    padding: 0;
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background 0.3s ease;
-}
-
-.modal-close:hover {
-    background: rgba(255, 255, 255, 0.1);
-}
-
-.modal-body {
-    padding: 1.5rem;
-}
-
-.stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 1rem;
-    margin-bottom: 2rem;
-}
-
-.stat-item {
-    text-align: center;
-    padding: 1rem;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 12px;
-}
-
-.stat-item h4 {
-    color: #94a3b8;
-    font-size: 0.9rem;
-    margin-bottom: 0.5rem;
-}
-
-.stat-item .stat-value {
-    color: var(--accent-gold);
-    font-size: 1.5rem;
-    font-weight: 700;
-    margin: 0;
-}
-
-.chart-placeholder {
-    text-align: center;
-    padding: 2rem;
-    background: rgba(255, 255, 255, 0.02);
-    border-radius: 12px;
-    border: 2px dashed rgba(255, 255, 255, 0.1);
-}
-
-.loading-placeholder {
-    text-align: center;
-    padding: 2rem;
-}
-
-.loading-spinner {
-    font-size: 2rem;
-    animation: spin 1s linear infinite;
-    margin-bottom: 1rem;
-}
-
-/* Смесь реагентов */
-.mixture-reagent {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    background: var(--accent-gold);
-    color: var(--dark-bg);
-    padding: 0.5rem 1rem;
-    border-radius: 20px;
-    font-size: 0.9rem;
-    font-weight: 500;
-}
-
-.mixture-reagent small {
-    opacity: 0.8;
-    font-size: 0.8rem;
-}
-
-.mixture-reagent button {
-    background: none;
-    border: none;
-    color: inherit;
-    font-size: 1.1rem;
-    cursor: pointer;
-    padding: 0;
-    width: 20px;
-    height: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    transition: background 0.3s ease;
-    margin-left: auto;
-}
-
-.mixture-reagent button:hover {
-    background: rgba(0, 0, 0, 0.1);
-}
-
-.mixture-stats {
-    margin: 1rem 0;
-    padding: 1rem;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 8px;
-}
-
-.mixture-stat {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    color: var(--text-light);
-}
-
-/* Анимации */
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-@keyframes slideInUp {
-    from { transform: translateY(30px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
-}
-</style>
-{% endblock %}
