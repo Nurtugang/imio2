@@ -6,4 +6,5 @@ urlpatterns = [
     path('', include('core.urls')),
     path('flotation/', include('flotation.urls')),
     path('molybdenum/', include('molybdenum.urls')),
+    path('antimony/', include('antimony.urls')),
 ]

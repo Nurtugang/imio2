@@ -1,0 +1,182 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8 mt-20">
+    <!-- Заголовок -->
+    <div class="text-center mb-12">
+        <h1 class="text-4xl font-bold bg-gradient-to-r from-blue-500 via-purple-500 to-yellow-500 bg-clip-text text-transparent mb-4">
+            🧪 Калькулятор восстановительной плавки антимоната натрия
+        </h1>
+        <p class="text-gray-400 text-lg max-w-3xl mx-auto">
+            Расчет материального баланса и прогнозирование результатов плавки для получения черновой металлической сурьмы
+        </p>
+    </div>
+
+    <!-- Основная сетка -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-7xl mx-auto">
+        
+        <!-- ЛЕВАЯ КОЛОНКА: Форма ввода -->
+        <div class="bg-white/5 backdrop-blur-lg border border-white/10 rounded-3xl p-8">
+            <h2 class="text-2xl font-semibold text-white mb-6 flex items-center gap-2">
+                📝 Входные данные
+            </h2>
+            
+            <form id="calculatorForm" class="space-y-6">
+                {% csrf_token %}
+                <!-- БЛОК: Исходное сырье -->
+                <div class="space-y-4">
+                    <h3 class="text-lg font-medium text-yellow-400 border-b border-yellow-400/30 pb-2">
+                        Антимонат натрия
+                    </h3>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">
+                            Масса антимоната (г)
+                        </label>
+                        <input type="number" name="antimonite_mass" 
+                               class="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                               value="73.4" step="0.1" required>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-2">
+                                Содержание Sb (%)
+                            </label>
+                            <input type="number" name="sb_content" 
+                                   class="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                                   value="60.39" step="0.01" required>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-2">
+                                Содержание Na (%)
+                            </label>
+                            <input type="number" name="na_content" 
+                                   class="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                                   value="7.66" step="0.01" required>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-2">
+                                Содержание As (%)
+                            </label>
+                            <input type="number" name="as_content" 
+                                   class="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                                   value="0.60" step="0.01" required>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-2">
+                                Влажность (%)
+                            </label>
+                            <input type="number" name="moisture" 
+                                   class="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                                   value="2.0" step="0.1" required>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- БЛОК: Параметры плавки -->
+                <div class="space-y-4">
+                    <h3 class="text-lg font-medium text-yellow-400 border-b border-yellow-400/30 pb-2">
+                        Параметры плавки
+                    </h3>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">
+                            Температура
+                        </label>
+                        <div class="grid grid-cols-2 gap-4">
+                            <label class="flex items-center justify-center px-4 py-3 bg-white/5 border border-white/20 rounded-xl cursor-pointer hover:bg-white/10 transition">
+                                <input type="radio" name="temperature" value="900" checked class="mr-2">
+                                <span class="text-white">900°C</span>
+                            </label>
+                            <label class="flex items-center justify-center px-4 py-3 bg-white/5 border border-white/20 rounded-xl cursor-pointer hover:bg-white/10 transition">
+                                <input type="radio" name="temperature" value="1000" class="mr-2">
+                                <span class="text-white">1000°C</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">
+                            Тип восстановителя
+                        </label>
+                        <div class="grid grid-cols-2 gap-4">
+                            <label class="flex items-center justify-center px-4 py-3 bg-white/5 border border-white/20 rounded-xl cursor-pointer hover:bg-white/10 transition">
+                                <input type="radio" name="reducer_type" value="coke" checked class="mr-2">
+                                <span class="text-white">Коксик</span>
+                            </label>
+                            <label class="flex items-center justify-center px-4 py-3 bg-white/5 border border-white/20 rounded-xl cursor-pointer hover:bg-white/10 transition">
+                                <input type="radio" name="reducer_type" value="charcoal" class="mr-2">
+                                <span class="text-white">Древесный уголь</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-2">
+                                Расход восстановителя (%)
+                            </label>
+                            <input type="number" name="reducer_amount" 
+                                   class="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                                   value="10" step="0.1" min="5" max="20" required>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-2">
+                                Зольность коксика (%)
+                            </label>
+                            <input type="number" name="coke_ash" 
+                                   class="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                                   value="15" step="0.1" required>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">
+                            Добавка свинца (г) <span class="text-gray-500 text-xs">— опционально</span>
+                        </label>
+                        <input type="number" name="lead_addition" 
+                               class="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                               value="0" step="0.1" min="0">
+                    </div>
+                </div>
+                
+                <!-- Кнопка расчета -->
+                <button type="submit" 
+                        class="w-full py-4 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl">
+                    🧮 Рассчитать показатели плавки
+                </button>
+            </form>
+        </div>
+        
+        <!-- ПРАВАЯ КОЛОНКА: Результаты -->
+        <div class="bg-white/5 backdrop-blur-lg border border-white/10 rounded-3xl p-8">
+            <h2 class="text-2xl font-semibold text-white mb-6 flex items-center gap-2">
+                📊 Результаты расчета
+            </h2>
+            
+            <div id="resultsContainer" class="hidden space-y-6">
+                <!-- Результаты будут загружены через JS -->
+            </div>
+            
+            <div id="noResults" class="text-center py-16 text-gray-400">
+                <div class="text-6xl mb-4">🧮</div>
+                <h3 class="text-xl font-semibold mb-2">Заполните данные</h3>
+                <p>Введите параметры плавки и нажмите "Рассчитать"</p>
+            </div>
+        </div>
+        
+    </div>
+</div>
+
+<script src="{% static 'js/antimony_calculator.js' %}"></script>
+{% endblock %}

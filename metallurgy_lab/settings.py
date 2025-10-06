@@ -19,6 +19,7 @@ INSTALLED_APPS = [
     'core',
     'flotation',
     'molybdenum',
+    'antimony',
 ]
 
 MIDDLEWARE = [
